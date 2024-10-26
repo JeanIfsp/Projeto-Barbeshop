@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load tz %}
+
+
+{% block content %}
+<body>
+    
+    <div class="container mt-5">
+        <h2 class="text-center">Horarios de Atendimento do dia de Hoje</h2>
+        
+        <!-- Formulário de Busca -->
+        <form action="{% url 'list_appointment' %}" class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="date" placeholder="Buscar por tipo de corte" aria-label="Search" name="q" value="{{ query }}">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button>
+        </form>
+
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Tipo de Corte</th>
+                    <th>Horario</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.type_id }}</td>
+                    <td>{{ appointment.date_time|date:"d/m/Y H:i" }}</td>
+                    <td>{{ appointment.status }}</td>
+                    <td>
+                        <a href="{% url 'reschedule_appointment' appointment.id %}" class="btn btn-primary   btn-sm">Reagendar Horário</a>
+                        {% if user.user_type == 'ADMIN' %}
+                            {% if appointment.date_time|date:"Y-m-d" == current_date %}
+                                <a href="{% url 'finish_appointment' appointment.id %}" class="btn btn-warning btn-sm"">
+                                    Finalizar Atendimento
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                        <!-- Botão Cancelar -->
+                        <a href="{% url 'delete_appointment' appointment.id %}" method="POST"  class="btn btn-danger btn-sm">
+                            Cancelar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Botão de Criar Serviço -->
+        <div class="text-center mt-4">
+            <a href="{% url 'register_appointment'%}" class="btn btn-primary">Agendar Horário</a>
+        </div>
+    </div>
+    <div class="container mt-3">
+        <!-- Mensagens de Sucesso -->
+        {% if messages %}
+        {% for message in messages %}   
+        {% if 'success' in message.tags %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+        {% elif 'error' in message.tags %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+   
+</body>
+    {% endif %}
+{% endblock %}

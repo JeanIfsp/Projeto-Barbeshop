@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="text-center">Gerenciar Dias e Horários De Funcionamento</h2>
+        
+        <!-- Tabela de Serviços -->
+        <table class="table table-striped mt-4">
+            <thead> 
+                <tr>
+                    <th>Dias Da Semana</th>
+                    <th>Horarios</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for schedule in schedules %}
+                <tr>
+                    <td>{{schedule.day}}</td>
+                    <td>{{schedule.start_time}} - {{schedule.end_time}}</td>
+                    <td>
+                        <!-- Botão de Atualizar -->
+                        <a href="{% url 'update_schedule' schedule.id %}" class="btn btn-warning btn-sm">Atualizar</a>
+                        <!-- Botão de Deletar -->
+                        <form action="{% url 'delete_schedule' schedule.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão de Criar Serviço -->
+        <div class="text-center mt-4">
+            <a href="{% url 'register_schedule'%}" class="btn btn-primary">Criar Novo Horário</a>
+        </div>
+    </div>
+{% endblock %}

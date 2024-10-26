@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Atualizar os Horários{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">     
+                <h1 class="text-center">Atualizar Dia e Horário </h3>
+                <form action="{% url 'update_schedule' schedule.id %}" method="POST">{% csrf_token %}
+                
+                    <div class="form-group">
+                        <label for="day">Dias da Semanas</label>
+                        <input type="text" class="form-control" id="day" name="day" value="{{schedule.day}}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_work">Abertura Do Salão, Horário atual: {{schedule.start_time}} hs</label>
+                        <input type="time" class="form-control" id="start_work" name="start_work" placeholder="Digite o horário de abetura do Salão, ex: 8:00" required value="{{start_work}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="end_work">Fechamento do Salão, Horário atual: {{schedule.end_time}} hs</label>
+                        <input type="time" class="form-control" id="end_work" name="end_work" placeholder="Digite o horário de Fechamento de Salão, ex: 8:00" required value="{{end_work}}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">ATUALIZAR</button>
+                </form>
+            </div>
+        </div>       
+    </div>
+{% endblock %}

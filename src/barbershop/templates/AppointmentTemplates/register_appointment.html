@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Agendar Serviço{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="col-md-6 offset-md-3">
+        <h1 class="text-center">Agendar Serviço</h1>
+        <form action="{% url 'register_appointment' %}" method="POST">{% csrf_token %}
+
+            <div class="form-group">
+                <label for="service">Tipo de Corte</label>
+                <select id="type" name="type" class="form-control">
+                    {% for type in service_type %}
+                        <option value="{{ type|upper }}">{{ type|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="date_time">Data e Hora</label>
+                <input type="date" id="date" name="date_time" class="form-control" required hx-get="{% url 'hours_list' %}?date={{ date }}" hx-target="#hours">
+            </div>
+
+            <div class="form-group">
+                <label for="hours">Horários Disponíveis</label>
+                <select name="hours" id="hours" class="form-control">
+                    <option value="">---</option>
+                </select>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary btn-block">Agendar</button>
+        </form>
+    </div>
+    <br>
+    <div class="container mt-3">
+        <!-- Mensagens de Sucesso -->
+        {% if messages %}
+            {% for message in messages %}   
+                {% if 'success' in message.tags %}
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
+                {% elif 'error' in message.tags %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+</div>

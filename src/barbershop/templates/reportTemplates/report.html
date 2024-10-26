@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório{% endblock %}
+
+{% block content %}
+    <div class="container mb-4">
+        <h1>Filtro de Gráfico</h1>
+        
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="mes">Mês</label>
+                <select id="mes" class="form-control">
+                    {% for month in months %}
+                        <option value="{{ month|upper }}">{{month.month_name}}</option>
+                    {% endfor %}
+                    <option value="Todos">Todos</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="tipoCorte">Tipo de Corte</label>
+                <select id="tipoCorte" class="form-control">
+                    {% for type in services %}
+                        
+                        <option value="{{ type|upper }}">{{ type.service_type|title }}</option>
+                    {% endfor %}
+                    <option value="Todos">Todos</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" id="filtrar">Filtrar</button>
+
+        <canvas id="meuGrafico" class="mt-4"></canvas>
+    </div>
+{% endblock %}

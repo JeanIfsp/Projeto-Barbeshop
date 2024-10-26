@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Meu Site{% endblock %}</title>
+    <!-- Incluindo Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <link href="{% static 'general/css/header.css' %}" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <header class="style-header">
+        <img src="https://cdn-icons-png.flaticon.com/32/2241/2241722.png" alt="" class="style-logo">
+        <nav class="style-nav">
+            <ul class="style-menu">
+            {% if user.is_authenticated and user.user_type == 'ADMIN' %}   
+                <li class="style-item">
+                    <section class="style-property">
+                        <header class="style-key">
+                            <button class="style-action">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
+                            
+                            <span class="style-name">Creating</span>
+                        </header>
+                        <ul class="style-value">
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'register_appointment'%}">
+                                    <button class="style-action">
+                                        <span class="material-symbols-outlined">calendar_month</span>
+                                    </button>
+                                    
+                                    <span class="style-name">Agendar</span>
+                                </a>
+                            </li>
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'register_schedule'%}">
+                                    <button class="style-action">
+                                        <span class="style-icon material-symbols-outlined">hourglass_empty</span>
+                                    </button>
+                                    <span class="style-name">Criar Horário de trabalho</span>
+                                </a>
+                            </li>
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'register_service'%}">
+                                    <button class="style-action">
+                                        <span class="style-icon material-symbols-outlined">content_cut</span>
+                                    </button>
+                                    <span class="style-name">Adicionar novos serviços</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </li>
+
+                <li class="style-item">
+                    <section class="style-property">
+                        <header class="style-key">
+                            <button class="style-action">
+                                <span class="material-symbols-outlined">list</span>
+                            </button>
+                            
+                            <span class="style-name">list</span>
+                        </header>
+                        <ul class="style-value">
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'list_appointment'%}">
+                                    <button class="style-action">
+                                        <span class="material-symbols-outlined">calendar_month</span>
+                                    </button>
+                                    
+                                    <span class="style-name">Serviços Agendados</span>
+                                </a>
+                            </li>
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'list_service'%}">
+                                    <button class="style-action">
+                                        <span class="style-icon material-symbols-outlined">hourglass_empty</span>
+                                    </button>
+                                    <span class="style-name">Valores do serviços</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </li>
+
+                <li lass="style-item">
+                    <section class="style-property">
+                        <header class="style-key">
+                            <button class="style-action">
+                                <span class="material-symbols-outlined">analytics</span>
+                            </button>
+                            
+                            <span class="style-name">Gráficos</span>
+                        </header>
+
+                        <ul class="style-value">
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'report' %}">
+                                    <button class="style-action">
+                                        <span class="material-symbols-outlined">calendar_month</span>
+                                    </button>
+                                    
+                                    <span class="style-name">Quantidade de atendimento Mês</span>
+                                </a>
+                            </li>
+
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'report_week' %}">
+                                    <button class="style-action">
+                                        <span class="material-symbols-outlined">date_range</span>
+                                    </button>
+                                    
+                                    <span class="style-name">Quantidade de atendimento Semanal</span>
+                                </a>
+                            </li>
+                            
+
+                            
+                            <li class="style-type">
+                                <a class="style-link" href="{% url 'report_amount' %}">
+                                    <button class="style-action">
+                                        <span class="material-symbols-outlined">paid</span>
+                                    </button>
+                                    
+                                    <span class="style-name">Faturamento</span>
+                                </a>
+                            </li>
+
+                           
+
+                        </ul>
+                    </section>
+                </li>
+
+
+            {% endif %}
+            {%if user.is_authenticated%}
+                <li class="style-type">
+                    <a class="style-link" href="{% url 'logout'%}">
+                        <button class="style-action">
+                            <span class="style-icon material-symbols-outlined">logout</span>
+                        </button>
+                        <span class="style-name">Logout</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if not user.is_authenticated%}
+                <li class="style-type">
+                    <a class="style-link" href="{% url 'register'%}">
+                        <button class="style-action">
+                            <span class="style-icon material-symbols-outlined">how_to_reg</span>
+                        </button>
+                        <span class="style-name">Cadastre-se</span>
+                    </a>
+                </li>
+
+                <li class="style-type">
+                    <a class="style-link" href="{% url 'login'%}">
+                        <button class="style-action">
+                            <span class="style-icon material-symbols-outlined">login</span>
+                        </button>
+                        <span class="style-name">Login</span>
+                    </a>
+                </li>
+            {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <!-- Header padrão -->
+    
+    
+    <!-- Bloco de conteúdo -->
+    <div class="container mb-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Incluindo Bootstrap JS e dependências -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/report/grafico.js' %}"></script>
+    
+    <script>
+
+        window.addEventListener('DOMContentLoaded', _ => {
+
+            window.document.querySelector(".style-header").addEventListener("click", _ => {
+
+                window.document.querySelector(".style-header").classList.toggle("style-open")
+
+            })
+         
+            for(const element of window.document.querySelectorAll(".style-property"))
+
+                element.addEventListener("click", ((event) => {
+
+                    event.stopPropagation()
+                    
+                    element.lastElementChild.style.maxHeight = element.lastElementChild.style.maxHeight ? null : element.lastElementChild.scrollHeight + "px"
+
+                }))
+
+            }
+
+        )
+
+    </script>
+
+</body>
+</html>

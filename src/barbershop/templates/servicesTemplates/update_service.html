@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Atualizar os Nomes Dos Cortes{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">     
+                <h1 class="text-center">Atualizar Corte e o valor</h3>
+                <form action="{% url 'update_service' services.id %}" method="POST">{% csrf_token %}
+                    <div class="form-group">
+                        <label for="haircut_name">Corte De Cabelo</label>
+                        <input type="text" class="form-control" id="haircut_name" name="haircut_name" placeholder="Digite o nome do corte de cabelo" required value="{{services.service_type}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="haircut_price">Valor do corte</label>
+                        <input type="text" class="form-control" id="haircut_price" name="haircut_price" placeholder="Digite o valor do corte exemplo: 10.00 " required value="{{haircut_price}}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">ATUALIZAR</button>
+                </form>
+            </div>
+        </div>       
+    </div>
+{% endblock %}

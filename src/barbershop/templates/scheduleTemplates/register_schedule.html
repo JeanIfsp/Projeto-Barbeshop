@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Adicionar Horários Disponíveis{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">     
+                <h1 class="text-center">Cadastrar Dia e Horário </h1>
+                <form action="{% url 'register_schedule' %}" method="POST">{% csrf_token %}
+                
+                    <div class="form-group">
+                        <label for="day">Dias da Semanas</label>
+                        <select id="day" name="day" class="form-control">
+                            {% for day in days %}
+                            <option value="{{ day|upper }}">{{ day|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_work">Abertura Do Salão</label>
+                        <input type="time" class="form-control" id="start_work" name="start_work" placeholder="Digite o horário de abetura do Salão, ex: 8:00" required value="{{start_work}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="end_work">Fechamento do Salão</label>
+                        <input type="time" class="form-control" id="end_work" name="end_work" placeholder="Digite o horário de Fechamento de Salão, ex: 8:00" required value="{{end_work}}">
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="launch_time">Duração do almoço</label>
+                        <select id="launch_time" name="launch_time" class="form-control">
+                            <option value="1">1 hora</option>
+                            <option value="2">2 horas</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Adicionar</button>
+                </form>
+            </div>
+        </div>       
+    </div>
+    
+{% endblock %}
