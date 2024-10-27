@@ -34,8 +34,9 @@ class UserService:
             return user
         except CustomUser.DoesNotExist:
             raise ServiceUserException("Usuário não foi encontrado")
-        
-    def get_user_cell_phone_number(self, cell_phone_number) -> bool:
+    
+    @staticmethod
+    def get_user_cell_phone_number(cell_phone_number) -> bool:
     
         try:
 

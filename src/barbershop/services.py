@@ -29,8 +29,8 @@ class ShedulesService:
     def get_hours_day(self, id):
 
         return Schedules.objects.get(id=id)
-    
-    def get_hours_by_day_name_week(self, day):
+    @staticmethod
+    def get_hours_by_day_name_week(day):
 
         return Schedules.objects.get(day__iexact=day)
     
@@ -64,7 +64,8 @@ class ServicePrice:
 
         return Service.objects.all()
     
-    def get_list_service_name(self) -> Service:
+    @staticmethod
+    def get_list_service_name() -> Service:
 
         return Service.objects.values_list('service_type', flat=True)
     
@@ -84,6 +85,8 @@ class ServicePrice:
 
         haircut_name = (data.POST.get('haircut_name'))
         haircut_price = data.POST.get('haircut_price')
+
+        haircut_price = haircut_price.replace(",", ".") if "," in haircut_price else haircut_price 
 
         schedules = Service.objects.create(service_type=haircut_name.upper(), price=float(haircut_price))
         schedules.save()
@@ -143,7 +146,7 @@ class ServiceAppointment:
 
     def deltatime_created_new_appointmnet(self, new_date_time):
     
-        return Appointment.objects.filter(date_time=new_date_time).exists()
+        return Appointment.objects.filter(date_time=new_date_time,status=AppointmentType.CANCELED).exists()
     
     def get_instance_appointment_id(self, id):
 
@@ -161,15 +164,16 @@ class ServiceAppointment:
         instance.status = AppointmentType.COMPLETED
         instance.save()
 
-    def get_appointment_any_day(self, day):
+    @staticmethod
+    def get_appointment_any_day(day):
         
-        return list(Appointment.objects.filter(date_time__date=day, status=AppointmentType.SHEDULED).annotate(hora=Extract('date_time', 'hour')).values_list('hora', flat=True))
+        return list(Appointment.objects.filter(date_time__date=day, status__in=(AppointmentType.SHEDULED, AppointmentType.COMPLETED)).annotate(hora=Extract('date_time', 'hour')).values_list('hora', flat=True))
     
     def update_appointment(self, id, day, instance_service):
 
         instance = self.get_appointment_id(id)
         instance.date_time = day
-        instance.type_id = instance_service
+        instance.type_id = instance_service 
         instance.save()
 
 class ServiceReport:

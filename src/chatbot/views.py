@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from twilio.twiml.messaging_response import MessagingResponse
 
 
-from .dispatch import IsClientBotOptions, AgendarBotClient, Orquestrador
+from .dispatch import Orquestrador
 
 @api_view(['GET','POST'])
 def bot_message(request):
@@ -20,9 +20,11 @@ def bot_message(request):
     session_exists = False
 
     if not session_exists:
+        print("request: ", request.POST.dict())
 
         orquestrador = Orquestrador(request)
         message_receive = request.POST.get("Body")
+        print("profile: ", request.POST.dict().get("ProfileName"))
         send_message = orquestrador.reply(message_receive)
         response = MessagingResponse()
         response.message(send_message)

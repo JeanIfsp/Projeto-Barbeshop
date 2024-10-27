@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from barbershop.services import ServicePrice, ServiceAppointment, ShedulesService
-from accounts.choices import UserType 
 from barbershop.validator import available_day
-from barbershop.utils import day_week, generate_hours, free_hours
+from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
 from accounts.services import UserService
 from django.contrib import messages
 from django.urls import reverse
@@ -137,16 +136,13 @@ def hours_list(request):
     try:    
 
         date = request.GET.get('date_time')
-        day = day_week(date)
-        print('day: ', day)
-        today = day.replace('Á', 'A') if 'Á' in day else day
-        print('Today: ', today)
-        schedules = ShedulesService()
-        work_hours = schedules.get_hours_by_day_name_week(today)
+    
+        today = recover_name_week_day(date)
+
+        work_hours = ShedulesService.get_hours_by_day_name_week(today)
         period_hours = generate_hours(work_hours.start_time, work_hours.end_time, work_hours.launch_time)
 
-        service_appointment = ServiceAppointment()
-        day_hours = service_appointment.get_appointment_any_day(datetime.strptime(date, '%Y-%m-%d'))
+        day_hours = ServiceAppointment.get_appointment_any_day(datetime.strptime(date, '%Y-%m-%d'))
 
         available_hours = free_hours(day_hours , period_hours)
 

@@ -19,5 +19,4 @@ def available_day(request):
 
     if exits_datetime:
         raise ValidationException(f"Horários indisponível {new_appointment_time}, agende outro horário")
-    
     return new_appointment_time

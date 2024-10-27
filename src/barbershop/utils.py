@@ -73,7 +73,7 @@ def retrieve_month_names(distinct_months):
 
     return months_with_names
 
-def converter_mont__to_nuber(month_name):
+def converter_month_to_nuber(month_name):
     # Dicionário que mapeia os meses em português para seus números
     month = {
         "janeiro": 1,
@@ -92,3 +92,7 @@ def converter_mont__to_nuber(month_name):
     
     # Retorna o número do mês ou None se o mês não for encontrado
     return month.get(month_name.lower())
+
+def recover_name_week_day(date):
+    day = day_week(date)
+    return day.replace('Á', 'A') if 'Á' in day else day
