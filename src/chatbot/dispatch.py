@@ -2,10 +2,12 @@ import re
 from datetime import datetime
 from .cache import RedisManager
 from .message import recover_message, recover_messar_with_action
+from .controller import recover_hours
 from accounts.services import UserService
 from barbershop.services import  ServicePrice
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
 from barbershop.services import ServiceAppointment, ShedulesService
+
 
 class InitializeBotOptions:
 
@@ -83,16 +85,8 @@ class Orquestrador:
                  
                     if datetime.strptime(recive_message, "%d/%m/%Y") >= datetime.now():
                
+                        available_hours =recover_hours(recive_message)
 
-                        data_formatada = data_formatada = datetime.strptime(recive_message, "%d/%m/%Y").strftime("%Y-%m-%d")
-                        today = recover_name_week_day(data_formatada)
-
-                        work_hours = ShedulesService.get_hours_by_day_name_week(today)
-                        period_hours = generate_hours(work_hours.start_time, work_hours.end_time, work_hours.launch_time)
-
-                        day_hours = ServiceAppointment.get_appointment_any_day(data_formatada)
-
-                        available_hours = free_hours(day_hours , period_hours)
                         available_hours_format = "hs \n ".join(available_hours)
                         
                         self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, recive_message)
@@ -131,7 +125,14 @@ class Orquestrador:
                                                       self.profile_name,
                                                       list_service_type.strip().lower()
                                                       )
-                return f"Infomer o horário como exemplo: 08 ou 10"
+                recive_message = self.redis.get_key(self.cell_phone_number_client).get("data")
+                available_hours = recover_hours(recive_message)
+                available_hours_format = "hs \n ".join(available_hours)
+                        
+                return recover_messar_with_action("OptionsClient",
+                                                   OptionsClient.INFORMATION_FORMAT_DATA,
+                                                   self.profile_name,
+                                                   available_hours_format) 
             
             elif self.redis.get_key(self.cell_phone_number_client).get('action') == 3:
 
