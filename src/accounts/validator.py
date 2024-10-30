@@ -2,11 +2,11 @@ import re
 from accounts.exception import ValidationException
 
 
-def validator_username(username: str):
+def validator_first_name(first_name: str):
 
-    if len(username) < 3:
-        raise ValidationException("Username precisa ter pelo menos 4 caracteres")
-    return username
+    if len(first_name) < 3:
+        raise ValidationException("O primeiro nome, necessita ter pelo menos 4 caracteres")
+    return first_name
 
 
 def validator_email(email: str):
@@ -37,11 +37,11 @@ def validator_password(password: str):
 
     return password
 
-def validator_age(age: str):
+def validator_age(cell_phone_number: str):
     
-    age_info = int(age)
+    regex_cell_phone_number = r"^\d{11}$"
 
-    if age_info < 1:
-        raise ValidationException("Idate Errada.")
+    if not bool(re.match(regex_cell_phone_number, cell_phone_number)):
+        raise ValidationException("Informe o número com a quantidade de caracter igual a do exemplo")
     
-    return age_info
+    return cell_phone_number

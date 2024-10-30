@@ -9,6 +9,7 @@ from accounts import validator
 from accounts.services import UserService
 from core import token
 from core.email import Email
+from accounts.choices import UserType
 
 
 def register(request):
@@ -20,8 +21,13 @@ def register(request):
             cell_phone = validator.validator_age(request.POST.get('cell_phone'))
             email = validator.validator_email(request.POST.get('email'))
             password = validator.validator_password(request.POST.get('password'))
-            user_service = UserService()
-            user = user_service.create_user({"cell_phone":cell_phone, "email":email, "password": password})
+            first_name = validator.validator_first_name(request.POST.get('first_name'))
+
+            user = UserService.create_user({"cell_phone":cell_phone,
+                                            "email":email,
+                                            "password": password,
+                                            "first_name":first_name,
+                                            "user_type":UserType.ADMIN})
 
             if not user:
                 messages.error("Não foi possível criar o seu cadastro")

@@ -4,14 +4,17 @@ from accounts.choices import UserType
 
 class UserService:
 
-    def create_user(self, data) -> CustomUser:
+    @staticmethod
+    def create_user(data) -> CustomUser:
         
         try:
-
+            
             cell_phone = data.get("cell_phone")
             email = data.get("email")
             password = data.get("password")
-
+            user_type = data.get("user_type")
+            first_name = data.get("first_name")
+     
             if CustomUser.objects.filter(username=email).exists():
                 raise ServiceUserException(
                     "Já existe um usuário com esse username/email."
@@ -20,14 +23,38 @@ class UserService:
             user = CustomUser.objects.create_user(username=email,
                                                     email=email,
                                                     password=password,
+                                                    first_name=first_name.capitalize(),
                                                     cell_phone_number=cell_phone,
-                                                    user_type=UserType.CLIENT)
+                                                    user_type=user_type)
             return user
         
         except Exception as error:
             raise Exception(str(error))
+    
+    @staticmethod
+    def create_client(data) -> CustomUser:
         
-    def get_user(self, email) -> CustomUser:
+        try:
+            
+            cell_phone = data.get("cell_phone")
+            email = data.get("email")
+            password = data.get("password")
+            user_type = data.get("user_type")
+            first_name = data.get("first_name")
+
+            user = CustomUser.objects.create_user(username=email,
+                                                    email=email,
+                                                    password=password,
+                                                    first_name=first_name.capitalize(),
+                                                    cell_phone_number=cell_phone,
+                                                    user_type=user_type)
+            return user
+        
+        except Exception as error:
+            raise Exception(str(error))
+    
+    @staticmethod
+    def get_user(email) -> CustomUser:
         
         try:
             user = CustomUser.objects.get(username=email)
@@ -40,11 +67,12 @@ class UserService:
     
         try:
 
-            user = CustomUser.objects.get(cell_phone_number=cell_phone_number)
+            user = CustomUser.objects.get(cell_phone_number=cell_phone_number).exists()
+            print("user: ", user)
             return True if user else False
         
         except CustomUser.DoesNotExist:
-            raise False
+            return False
 
     def update_user(self, email, new_password):
 
