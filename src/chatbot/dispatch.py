@@ -1,12 +1,13 @@
 import re
 from datetime import datetime
 from .cache import RedisManager
-from .message import recover_message, recover_messar_with_action
+from .message import recover_message, recover_messar_with_action, create_message_to_show_service
 from .controller import recover_hours
 from accounts.services import UserService
-from barbershop.services import  ServicePrice
+from barbershop.service.service import ServicePrice
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
-from barbershop.services import ServiceAppointment, ShedulesService
+from barbershop.appointment.service import ServiceAppointment 
+from barbershop.schedule.service import  ShedulesService
 
 
 class InitializeBotOptions:
@@ -85,7 +86,7 @@ class Orquestrador:
                  
                     if datetime.strptime(recive_message, "%d/%m/%Y") >= datetime.now():
                
-                        available_hours =recover_hours(recive_message)
+                        available_hours = recover_hours(recive_message)
 
                         available_hours_format = "hs \n ".join(available_hours)
                         
@@ -123,7 +124,7 @@ class Orquestrador:
                     return recover_messar_with_action("OptionsClient",
                                                       OptionsClient.CHOOSE_YOUR_SERVICE_TYPE,
                                                       self.profile_name,
-                                                      list_service_type.strip().lower()
+                                                      create_message_to_show_service(list(service_type))
                                                       )
                 recive_message = self.redis.get_key(self.cell_phone_number_client).get("data")
                 available_hours = recover_hours(recive_message)
@@ -138,11 +139,14 @@ class Orquestrador:
 
                 data = self.redis.get_key(self.cell_phone_number_client).get('data')
                 service_type = data.get("sevice_type")
-                list_service_type = "\n".join(list(service_type))
 
-                if recive_message.upper() in service_type:
-                    
-                    data_user = {"day": data.get("day"), "hours": data.get("hours"),"service_type": recive_message}
+                pattern = "^(1?[0-9]|20)$" 
+
+                if bool(re.match(pattern, recive_message)):
+
+                    type_service = service_type[int(recive_message)]
+                    print("type_service: ", type_service)
+                    data_user = {"day": data.get("day"), "hours": data.get("hours"),"service_type": type_service}
                     self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_user)
                     
                     return recover_messar_with_action("OptionsClient",
@@ -150,18 +154,21 @@ class Orquestrador:
                                                       self.profile_name,
                                                       data.get("hours"),
                                                       data.get("day"),
-                                                      recive_message
+                                                      type_service
                                                       )
                 
                 return recover_messar_with_action("OptionsClient",
                                                       OptionsClient.CHOOSE_YOUR_SERVICE_TYPE,
                                                       self.profile_name,
-                                                      list_service_type.strip().lower()
+                                                      create_message_to_show_service(list(service_type))
                                                       )
             elif self.redis.get_key(self.cell_phone_number_client).get('action') == 4:
 
                 if recive_message == "1":
+                    # TODO salvar agendamento
+
                     user = UserService.get_user_cell_phone_number(self.cell_phone_number_client)
+
                     self.redis.delete_key(self.cell_phone_number_client)
                     return recover_messar_with_action("OptionsClient",
                                                       OptionsClient.FINISH_REGISTER_APPOINTMENT,

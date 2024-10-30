@@ -62,10 +62,11 @@ MESSAGES = {
 }
 
 
-def recover_message(key, action, *args):
+def recover_message(key, *args):
     print('args: ', args)    
     message = MESSAGES.get(key)
     message_add_values = message % args
+    print(message_add_values)
     return message_add_values
 
 def recover_messar_with_action(key, action, *args):
@@ -76,3 +77,10 @@ def recover_messar_with_action(key, action, *args):
     message_add_values = message % args
     print("message_add_values: ", message_add_values)
     return message_add_values
+
+def create_message_to_show_service(service_name):
+
+    result =  "\n".join([f"{i} - {service}" for i, service in enumerate(service_name)])
+    print(result)
+    return result
+       

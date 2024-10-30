@@ -1,6 +1,7 @@
 from datetime import datetime
-from barbershop.services import ShedulesService, ServiceAppointment
 from barbershop.utils import recover_name_week_day, generate_hours, free_hours
+from barbershop.schedule.service import ShedulesService
+from barbershop.appointment.service import ServiceAppointment
 
 
 def recover_hours(recive_message):
