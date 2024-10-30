@@ -1,11 +1,10 @@
-from barbershop.services import ServiceAppointment
+from barbershop.appointment.service import ServiceAppointment
 from accounts.exception import ValidationException
 from datetime import datetime, timedelta
 
 
 def available_day(request):
 
-    print(request.POST.get('hours'))
 
     if request.POST.get('hours') == None:
         raise ValidationException(f"Não temos horários disponivel para este dia")
