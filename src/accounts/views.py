@@ -18,7 +18,7 @@ def register(request):
         
         try:
             
-            cell_phone = validator.validator_age(request.POST.get('cell_phone'))
+            cell_phone = validator.validator_cell_phone_number(request.POST.get('cell_phone'))
             email = validator.validator_email(request.POST.get('email'))
             password = validator.validator_password(request.POST.get('password'))
             first_name = validator.validator_first_name(request.POST.get('first_name'))

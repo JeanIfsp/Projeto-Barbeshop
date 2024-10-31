@@ -1,5 +1,6 @@
 import re
 from accounts.exception import ValidationException
+from accounts.services import UserService
 
 
 def validator_first_name(first_name: str):
@@ -37,11 +38,13 @@ def validator_password(password: str):
 
     return password
 
-def validator_age(cell_phone_number: str):
+def validator_cell_phone_number(cell_phone_number: str):
     
     regex_cell_phone_number = r"^\d{11}$"
+ 
 
     if not bool(re.match(regex_cell_phone_number, cell_phone_number)):
         raise ValidationException("Informe o número com a quantidade de caracter igual a do exemplo")
-    
+    elif UserService.get_user_cell_phone_number(cell_phone_number):
+        raise ValidationException("O Celular Informado já está cadastrado")
     return cell_phone_number

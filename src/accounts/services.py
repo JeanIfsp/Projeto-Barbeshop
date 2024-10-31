@@ -36,18 +36,15 @@ class UserService:
         
         try:
             
-            cell_phone = data.get("cell_phone")
-            email = data.get("email")
-            password = data.get("password")
-            user_type = data.get("user_type")
-            first_name = data.get("first_name")
+            cell_phone = data.get("cell_phone_number")
+            name = data.get("name")
 
-            user = CustomUser.objects.create_user(username=email,
-                                                    email=email,
-                                                    password=password,
-                                                    first_name=first_name.capitalize(),
+            user = CustomUser.objects.create_user(username=name,
+                                                    email="",
+                                                    password="14@320J9a",
+                                                    first_name=name,
                                                     cell_phone_number=cell_phone,
-                                                    user_type=user_type)
+                                                    user_type=UserType.CLIENT)
             return user
         
         except Exception as error:
@@ -67,7 +64,7 @@ class UserService:
     
         try:
 
-            user = CustomUser.objects.get(cell_phone_number=cell_phone_number).exists()
+            user = CustomUser.objects.get(cell_phone_number=cell_phone_number)
             print("user: ", user)
             return True if user else False
         
