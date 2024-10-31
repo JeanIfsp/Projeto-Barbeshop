@@ -6,11 +6,13 @@ MESSAGES_INITIALIZE = """
     _de agendamento de nossos serviços._
 
     *Como podemos ajudá-lo?* 😊
-
+    
+    *Deseja se cadastrar ?*
+    
     Digite o número correspondente à sua escolha:
 
-    *%s* - Já sou cliente  
-    *%s* - Quero me cadastrar
+    *1 - Sim* 
+    *2 - Não*
 """
 
 MESSAGES_CLIENT_EXISTS = """
@@ -46,6 +48,16 @@ MESSAGE_FINISH_REFISTER_APPOINTMENT = """
 *Estamos até aguardando.*
 """
 
+MESSAGE_QUESTION_REGISTER_USER = """
+📲*%s* podemos salvar os seguintes dados:\n
+*Nome:* %s
+*what's up:* %s\n
+
+*1 - Sim*
+*2 - Não*
+"""
+
+
 MESSAGES = {
     "InitializeBotOptions": MESSAGES_INITIALIZE,
     "OptionsClient": {
@@ -55,7 +67,10 @@ MESSAGES = {
         "3":MESSAGE_CHOOSE_YOUR_SERVICE_TYPE,
         "4":MESSAGES_INFORMATION_REGISTER_APPOINTMENT,
         "5":MESSAGE_FINISH_REFISTER_APPOINTMENT
-        }
+        },
+    "RegisterUser":{
+        "1":MESSAGE_QUESTION_REGISTER_USER
+    }
 
 
                             
