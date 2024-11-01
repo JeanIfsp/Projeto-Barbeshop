@@ -49,7 +49,7 @@ MESSAGE_FINISH_REFISTER_APPOINTMENT = """
 """
 
 MESSAGE_QUESTION_REGISTER_USER = """
-📲*%s* podemos salvar os seguintes dados:\n
+📲 *%s* podemos salvar os seguintes dados:\n
 *Nome:* %s
 *what's up:* %s\n
 
@@ -92,6 +92,12 @@ def recover_messar_with_action(key, action, *args):
     message_add_values = message % args
     print("message_add_values: ", message_add_values)
     return message_add_values
+
+
+def create_message_to_show_hours(hours):
+
+    result = "\n".join([f"{i} - {hour}" for i, hour in enumerate(hours)])
+    return result
 
 def create_message_to_show_service(service_name):
 

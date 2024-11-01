@@ -2,11 +2,14 @@ from datetime import datetime
 from barbershop.utils import recover_name_week_day, generate_hours, free_hours
 from barbershop.schedule.service import ShedulesService
 from barbershop.appointment.service import ServiceAppointment
+from chatbot.utils import conveter_data
 
 
 def recover_hours(recive_message):
+    print("recover_hours")
+    print("recive_message: ", recive_message)
+    data_formatada = datetime.strptime(recive_message, "%d/%m/%Y").strftime("%Y-%m-%d")
 
-    data_formatada = data_formatada = datetime.strptime(recive_message, "%d/%m/%Y").strftime("%Y-%m-%d")
     today = recover_name_week_day(data_formatada)
 
     work_hours = ShedulesService.get_hours_by_day_name_week(today)
@@ -15,6 +18,18 @@ def recover_hours(recive_message):
     day_hours = ServiceAppointment.get_appointment_any_day(data_formatada)
 
     available_hours = free_hours(day_hours , period_hours)
+    
     return available_hours
 
+def exists_day_and_hour_available(day, hours):
+
+    day_format = conveter_data(day)
+    date_time_str = day_format + "T" + hours
+
+    new_appointment_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M')
+
+    service_appointment = ServiceAppointment()
+    exits_datetime = service_appointment.get_hours_has_status_canceled(new_appointment_time)
+
+    return True if exits_datetime else False
                         

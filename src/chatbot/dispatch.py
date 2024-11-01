@@ -1,15 +1,20 @@
 import re
 from datetime import datetime
-from .cache import RedisManager
-from .message import recover_message, recover_messar_with_action, create_message_to_show_service
-from .controller import recover_hours
+from chatbot.cache import RedisManager
+from chatbot.controller import recover_hours, exists_day_and_hour_available
 from accounts.services import UserService
 from accounts.validator import validator_first_name
 from barbershop.service.service import ServicePrice
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
 from barbershop.appointment.service import ServiceAppointment 
 from barbershop.schedule.service import  ShedulesService
-from chatbot.utils import value_is_number
+from chatbot.utils import value_is_number, conveter_data
+from .message import (
+    recover_message,
+    recover_messar_with_action,
+    create_message_to_show_service,
+    create_message_to_show_hours
+    )
 
 
 class InitializeBotOptions:
@@ -83,10 +88,9 @@ class Orquestrador:
         
     def cliente(self, recive_message):
 
-                
         current_date = datetime.now().strftime("%d/%m/%Y")
         
-        if self.redis.get_key(self.cell_phone_number_client).get('action') == 0:
+        if self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.INITIALIZE_QUESTION:
         
             if recive_message == AnswerDefault.YES:
 
@@ -99,22 +103,27 @@ class Orquestrador:
                                         )
             
             elif recive_message == AnswerDefault.NO:
-
+                self.redis.delete_key(self.cell_phone_number_client)
                 return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
         
-        elif self.redis.get_key(self.cell_phone_number_client).get('action') == 1:
+        elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.INFORMATION_FORMAT_DATA:
 
-            pattern = r'^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[0-2])/[0-9]{4}$'
+            pattern = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$'
 
             if re.match(pattern, recive_message):
-                
-                if datetime.strptime(recive_message, "%d/%m/%Y") >= datetime.now():
-            
+                print('---------------------------------------------------')
+                print(recive_message)
+                print(datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date()) 
+                print('---------------------------------------------------')
+                if datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date():
+                    print("chegou aqui")
                     available_hours = recover_hours(recive_message)
 
-                    available_hours_format = "hs \n ".join(available_hours)
+                    available_hours_format = create_message_to_show_hours(available_hours)
                     
-                    self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, recive_message)
+                    data = {"day":recive_message, "available_hours": available_hours}
+                    
+                    self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, data)
                     
                     return recover_messar_with_action("OptionsClient",
                                                 OptionsClient.INFORMATION_FORMAT_DATA,
@@ -129,18 +138,19 @@ class Orquestrador:
             
             return f"A data que você informou não segue o padrão, Por gentileza informe este padrões data commo exemplo: {current_date}"
         
-        elif self.redis.get_key(self.cell_phone_number_client).get('action') == 2:
+        elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME:
 
-            pattern = r'^(?:([01]?\d|2[0-3]):([0-5]\d)|([01]?\d|2[0-3])) ?(?:hs)?$'
+           
 
-            if re.match(pattern, recive_message):
+            if value_is_number(recive_message):
 
                 service_type = ServicePrice.get_list_service_name()
-                list_service_type = "\n".join(list(service_type))
+                data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+                hour = data_save_redis.get("available_hours")
 
                 data = {}
-                data["day"] = self.redis.get_key(self.cell_phone_number_client).get('data')
-                data["hours"] = recive_message
+                data["day"] = data_save_redis.get("day")
+                data["hours"] = hour[int(recive_message)]
                 data["sevice_type"] = list(service_type)
             
                 self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_SERVICE_TYPE, data)
@@ -150,6 +160,7 @@ class Orquestrador:
                                                     self.profile_name,
                                                     create_message_to_show_service(list(service_type))
                                                     )
+            
             recive_message = self.redis.get_key(self.cell_phone_number_client).get("data")
             available_hours = recover_hours(recive_message)
             available_hours_format = "hs \n ".join(available_hours)
@@ -159,7 +170,7 @@ class Orquestrador:
                                                 self.profile_name,
                                                 available_hours_format) 
         
-        elif self.redis.get_key(self.cell_phone_number_client).get('action') == 3:
+        elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.CHOOSE_YOUR_SERVICE_TYPE:
 
             data = self.redis.get_key(self.cell_phone_number_client).get('data')
             service_type = data.get("sevice_type")
@@ -170,8 +181,8 @@ class Orquestrador:
 
                 type_service = service_type[int(recive_message)]
                 print("type_service: ", type_service)
-                data_user = {"day": data.get("day"), "hours": data.get("hours"),"service_type": type_service}
-                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_user)
+                data_appointment = {"day": data.get("day"), "hours": data.get("hours"), "service_type": type_service}
+                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_appointment)
                 
                 return recover_messar_with_action("OptionsClient",
                                                     OptionsClient.REGISTER_APPOINTMENT,
@@ -186,20 +197,37 @@ class Orquestrador:
                                                     self.profile_name,
                                                     create_message_to_show_service(list(service_type))
                                                     )
-        elif self.redis.get_key(self.cell_phone_number_client).get('action') == 4:
+        elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.REGISTER_APPOINTMENT:
 
-            if recive_message == "1":
+            if recive_message == AnswerDefault.YES:
                 # TODO salvar agendamento
+                data_appointment = self.redis.get_key(self.cell_phone_number_client).get("data")
+                
+                if exists_day_and_hour_available(data_appointment.get("day"), data_appointment.get("hours")):
 
-                user = UserService.get_user_cell_phone_number(self.cell_phone_number_client)
+                    user = UserService.get_user_instance_cell_phone_number(self.cell_phone_number_client)
+               
+                    instance_service = ServicePrice.get_instace_service_name(data_appointment.get("service_type"))
+                    
+                    day_time = conveter_data(data_appointment.get("day")) + 'T' + data_appointment.get("hours")
+                    date_time = datetime.strptime(day_time, '%Y-%m-%dT%H:%M')
+                    
+                    ServiceAppointment.create_new_appointment(user, instance_service, date_time)
 
-                self.redis.delete_key(self.cell_phone_number_client)
+                    self.redis.delete_key(self.cell_phone_number_client)
+                    return recover_messar_with_action("OptionsClient",
+                                                        OptionsClient.FINISH_REGISTER_APPOINTMENT,
+                                                        self.profile_name,
+                                                        )
+                
                 return recover_messar_with_action("OptionsClient",
-                                                    OptionsClient.FINISH_REGISTER_APPOINTMENT,
-                                                    self.profile_name,
-                                                    )
-            elif recive_message == "2":
+                                    OptionsClient.INITIALIZE_QUESTION,
+                                    self.profile_name)
+            
+            elif recive_message == AnswerDefault.NO:
                 self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, None)
+                return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
+            
             
             else:
                 data = self.redis.get_key(self.cell_phone_number_client).get('data')
@@ -220,11 +248,11 @@ class Orquestrador:
                 
                 if value_is_number(recive_message):
                     
-                    if recive_message == "1":
+                    if recive_message == AnswerDefault.YES:
                         self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.FINISH_REGISTER_USER, None)
                         return "Por gentileza, informe como você gostaria de ser chamado ?"
                    
-                    elif recive_message == "2":
+                    elif recive_message == AnswerDefault.NO:
                         self.redis.delete_key(self.cell_phone_number_client)
                         return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
             
@@ -248,7 +276,7 @@ class Orquestrador:
                                         self.cell_phone_number_client
                                         )
                 
-                return "Por gentileza, informe como você gostaria de ser chamado ?"
+                return "Por gentileza, informe como você gostaria de ser chamado com 4 letra no mínimo ?"
             
 
             if value_is_number(recive_message):
@@ -257,8 +285,11 @@ class Orquestrador:
                     data = self.redis.get_key(self.cell_phone_number_client).get("data")
                     UserService.create_client({"name":data.get("name"), "cell_phone_number": data.get("cell_phone_number")})
                     self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, None)
-                    return "✅ Cadastro realizado com sucesso!"
-                
+                    message_success = "✅ Cadastro realizado com sucesso!"
+                    message = recover_messar_with_action("OptionsClient",
+                                    OptionsClient.INITIALIZE_QUESTION,
+                                    self.profile_name)
+                    return message_success + "\n" + message
                 elif recive_message == AnswerDefault.NO:
                     self.redis.delete_key(self.cell_phone_number_client)
                     return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
