@@ -41,10 +41,10 @@ class ServicePrice:
     
     def update_service(self, instance, data):
 
-        haircut_name = data.POST.get('haircut_name')
         haircut_price = data.POST.get('haircut_price')
-    
-        instance.service_type =  haircut_name
+
+        haircut_price = haircut_price.replace(",", ".") if "," in haircut_price else haircut_price 
+
         instance.price = float(haircut_price)
         instance.save()
 

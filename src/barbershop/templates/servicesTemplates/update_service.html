@@ -11,7 +11,7 @@
                 <form action="{% url 'update_service' services.id %}" method="POST">{% csrf_token %}
                     <div class="form-group">
                         <label for="haircut_name">Corte De Cabelo</label>
-                        <input type="text" class="form-control" id="haircut_name" name="haircut_name" placeholder="Digite o nome do corte de cabelo" required value="{{services.service_type}}">
+                        <input type="text" class="form-control" id="haircut_name" name="haircut_name" placeholder="Digite o nome do corte de cabelo" required value="{{services.service_type}}" disabled>
                     </div>
                     <div class="form-group">
                         <label for="haircut_price">Valor do corte</label>
@@ -22,4 +22,12 @@
             </div>
         </div>       
     </div>
+    <br>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endblock %}
