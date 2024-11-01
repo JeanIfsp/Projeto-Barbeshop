@@ -34,13 +34,17 @@ class UserService:
     @staticmethod
     def create_client(data) -> CustomUser:
         
+        import uuid
+        
         try:
-            
+                        
             cell_phone = data.get("cell_phone_number")
             name = data.get("name")
 
+            email = f"{name}{uuid.uuid4()}@example.com"
+
             user = CustomUser.objects.create_user(username=name,
-                                                    email="",
+                                                    email=email,
                                                     password="14@320J9a",
                                                     first_name=name,
                                                     cell_phone_number=cell_phone,
@@ -70,6 +74,11 @@ class UserService:
         
         except CustomUser.DoesNotExist:
             return False
+
+    @staticmethod
+    def get_user_instance_cell_phone_number(cell_phone_number) -> CustomUser:
+        
+        return CustomUser.objects.get(cell_phone_number=cell_phone_number)
 
     def update_user(self, email, new_password):
 
