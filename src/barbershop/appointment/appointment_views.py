@@ -19,7 +19,6 @@ from django.utils.timezone import now
 def register_appointment(request):
     
     try:
-
         
         service = ServicePrice.get_list_service_name()
 
@@ -63,7 +62,7 @@ def list_appointment(request):
             
             appointment_date = service_appointment.get_appointment_date(date)
             return render(request, 'AppointmentTemplates/list_appointment.html', {'appointments': appointment_date, 'current_date':current_date})
-        print(appointment_today)
+        
         return render(request, 'AppointmentTemplates/list_appointment.html', {'appointments': appointment_today, 'current_date':current_date})
         
     except Exception as error:
@@ -76,7 +75,6 @@ def search_list_appointment(request):
     service_appointment = ServiceAppointment()
     if date:
         appointment_date = service_appointment.get_appointment_date(date)
-        print(appointment_date)
         return render(request, 'AppointmentTemplates/search_list_appointment.html', {'appointments': appointment_date})
     return redirect('list_appointment')
 

@@ -18,19 +18,26 @@
             <thead>
                 <tr>
                     <th>Tipo de Corte</th>
+                    <th>Cliente</th>
                     <th>Horario</th>
                     <th>Status</th>
                     <th>Ações</th>
+                   
                 </tr>
             </thead>
             <tbody>
                 {% for appointment in appointments %}
                 <tr>
                     <td>{{ appointment.type_id }}</td>
+                    <td>{{ appointment.user.first_name }}</td>
                     <td>{{ appointment.date_time|date:"d/m/Y H:i" }}</td>
                     <td>{{ appointment.status }}</td>
-                    <td>
-                        <a href="{% url 'reschedule_appointment' appointment.id %}" class="btn btn-primary   btn-sm">Reagendar Horário</a>
+                   
+                    {% if appointment.status == 'Agendado' %}
+                        <td>
+                            <a href="{% url 'reschedule_appointment' appointment.id %}" class="btn btn-primary   btn-sm">Reagendar Horário</a>
+                        
+                        
                         {% if user.user_type == 'ADMIN' %}
                             {% if appointment.date_time|date:"Y-m-d" == current_date %}
                                 <a href="{% url 'finish_appointment' appointment.id %}" class="btn btn-warning btn-sm"">
@@ -39,10 +46,14 @@
                             {% endif %}
                         {% endif %}
                         <!-- Botão Cancelar -->
-                        <a href="{% url 'delete_appointment' appointment.id %}" method="POST"  class="btn btn-danger btn-sm">
-                            Cancelar
-                        </a>
-                    </td>
+                       
+                            <a href="{% url 'delete_appointment' appointment.id %}" method="POST"  class="btn btn-danger btn-sm">
+                                Cancelar
+                            </a>
+                        
+                        </td>
+                    {% endif %}
+                    
                 </tr>
                 {% endfor %}
             </tbody>

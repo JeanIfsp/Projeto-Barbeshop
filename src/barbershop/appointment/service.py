@@ -42,7 +42,7 @@ class ServiceAppointment:
         instance_user = UserService()
         return Appointment.objects.filter(user=instance_user.get_user(user))
 
-    def deltatime_created_new_appointmnet(self, new_date_time):
+    def get_hours_has_status_canceled(self, new_date_time):
     
         return Appointment.objects.filter(date_time=new_date_time,status=AppointmentType.CANCELED).exists()
     
