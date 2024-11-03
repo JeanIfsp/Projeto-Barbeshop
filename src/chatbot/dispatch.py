@@ -55,7 +55,6 @@ class Orquestrador:
 
     def crate_context(self, intent, action, data):
         self.redis.set_key(self.cell_phone_number_client, {"intent":intent, "action":action, "data":data})
-         
 
     def reply(self, recive_message):
 
@@ -111,24 +110,24 @@ class Orquestrador:
             pattern = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$'
 
             if re.match(pattern, recive_message):
-                print('---------------------------------------------------')
-                print(recive_message)
-                print(datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date()) 
-                print('---------------------------------------------------')
-                if datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date():
-                    print("chegou aqui")
-                    available_hours = recover_hours(recive_message)
 
-                    available_hours_format = create_message_to_show_hours(available_hours)
-                    
-                    data = {"day":recive_message, "available_hours": available_hours}
-                    
-                    self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, data)
-                    
-                    return recover_messar_with_action("OptionsClient",
-                                                OptionsClient.INFORMATION_FORMAT_DATA,
-                                                self.profile_name,
-                                                available_hours_format)
+                if datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date():
+            
+                    work_hours_exists, available_hours = recover_hours(recive_message)
+                    if work_hours_exists:
+                        available_hours_format = create_message_to_show_hours(available_hours)
+                        
+                        data = {"day":recive_message, "available_hours": available_hours}
+                        
+                        self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, data)
+                        
+                        return recover_messar_with_action("OptionsClient",
+                                                    OptionsClient.INFORMATION_FORMAT_DATA,
+                                                    self.profile_name,
+                                                    available_hours_format)
+                    message = f"Não há horário cadastrado para este dia: {recive_message}, informe outro, por gentileza"
+                    self.replay_exeception(message)
+              
                 
                 return recover_messar_with_action("OptionsClient",
                                         OptionsClient.INFORMATION_FORMAT_DATA,
@@ -141,7 +140,6 @@ class Orquestrador:
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME:
 
            
-
             if value_is_number(recive_message):
 
                 service_type = ServicePrice.get_list_service_name()
@@ -180,7 +178,7 @@ class Orquestrador:
             if value_is_number(recive_message):
 
                 type_service = service_type[int(recive_message)]
-                print("type_service: ", type_service)
+
                 data_appointment = {"day": data.get("day"), "hours": data.get("hours"), "service_type": type_service}
                 self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_appointment)
                 
@@ -200,9 +198,9 @@ class Orquestrador:
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.REGISTER_APPOINTMENT:
 
             if recive_message == AnswerDefault.YES:
-                # TODO salvar agendamento
+    
                 data_appointment = self.redis.get_key(self.cell_phone_number_client).get("data")
-                
+           
                 if exists_day_and_hour_available(data_appointment.get("day"), data_appointment.get("hours")):
 
                     user = UserService.get_user_instance_cell_phone_number(self.cell_phone_number_client)
@@ -225,7 +223,7 @@ class Orquestrador:
                                     self.profile_name)
             
             elif recive_message == AnswerDefault.NO:
-                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, None)
+                self.delete_key(self.cell_phone_number_client)
                 return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
             
             
@@ -241,10 +239,10 @@ class Orquestrador:
 
     def register_client(self, recive_message): 
 
-        if self.redis.get_key(self.cell_phone_number_client).get('intent') == 2:
+        if self.redis.get_key(self.cell_phone_number_client).get('intent') == InitializeBotOptions.REGISTER_USER:
             
 
-            if self.redis.get_key(self.cell_phone_number_client).get('action') == 0:
+            if self.redis.get_key(self.cell_phone_number_client).get('action') == RegisterUser.QUESTION_NAME:
                 
                 if value_is_number(recive_message):
                     
@@ -262,7 +260,7 @@ class Orquestrador:
                                 )
 
             
-            if self.redis.get_key(self.cell_phone_number_client).get('action') == 1:
+            if self.redis.get_key(self.cell_phone_number_client).get('action') == RegisterUser.FINISH_REGISTER_USER:
                 
                 if len(recive_message) > 3:
                     data = {"name": recive_message, "cell_phone_number": self.cell_phone_number_client}
@@ -302,3 +300,6 @@ class Orquestrador:
                                         data.get("name"),
                                         data.get("cell_phone_number")
                                         )
+
+    def replay_exeception(self, message):
+        return message
