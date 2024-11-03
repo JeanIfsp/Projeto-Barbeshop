@@ -3,9 +3,9 @@ FROM python:3.10
 
 WORKDIR /app
 
-COPY src /app
+COPY ./src /app
 
-COPY src/requeriments.txt /app/requeriments.txt
+COPY ./src/requeriments.txt /app/requeriments.txt
 
 RUN pip install --no-cache-dir -r requeriments.txt
 
@@ -18,5 +18,4 @@ ENV PYTHONUNBUFFERED 1
 # Expõe a porta usada pelo Gunicorn
 EXPOSE 8000
 
-# Comando para iniciar o Gunicorn com o Django
-CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
