@@ -1,0 +1,15 @@
+SECRET_KEY='django-insecure-h-6u-ntwc7d+35kuf*0)b-xi=5end$)#$^nv+fs^r*4w#^tt*e'
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT_GMAIL=465
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+DEFAULT_FROM_EMAIL=
+DEBUG=True
+PROD=False
+REDIS_LOCATION=redis://{}:6379/1
+MYSQL_ROOT_PASSWORD=barbeshop12@356
+MYSQL_DATABASE=banco
+MYSQL_USER=barbeshop
+MYSQL_PASSWORD=barbeshop123456
