@@ -21,11 +21,16 @@ class ShedulesService:
     def get_hours_day(self, id):
 
         return Schedules.objects.get(id=id)
+
     @staticmethod
     def get_hours_by_day_name_week(day):
-
+        
         return Schedules.objects.get(day__iexact=day)
     
+    def get_hours_by_day_name_week_exists(day):
+
+        return Schedules.objects.filter(day__iexact=day).exists()
+
     def create_new_scheduler(self, data):
 
         day = data.POST.get('day')
