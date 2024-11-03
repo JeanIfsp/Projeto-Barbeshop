@@ -82,10 +82,21 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQL_DATABASE'),
+        'USER': os.getenv('MYSQL_USER'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', 'db'),  # Use 'db' as default from .env
+        'PORT': os.getenv('DB_PORT', '3306'),  # Use '3306' as default from .env
     }
 }
 
@@ -135,14 +146,30 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # settings.py
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # ou o servidor SMTP do seu provedor
-EMAIL_PORT_GMAIL = 465
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'barbeiroshop2024@gmail.com'  # substitua pelo seu email
+# SECRET_KEY='django-insecure-h-6u-ntwc7d+35kuf*0)b-xi=5end$)#$^nv+fs^r*4w#^tt*e'
+# MAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+# EMAIL_HOST=smtp.gmail.com
+# EMAIL_PORT_GMAIL=465
+# EMAIL_USE_TLS=True
+# EMAIL_HOST_USER=barbeiroshop2024@gmail.com
+# EMAIL_HOST_PASSWORD=zcyczyqehopfpzja 
+# DEFAULT_FROM_EMAIL=barbeiroshop2024@gmail.com
+# DEBUG=True
+# PROD=False
+# REDIS_LOCATION=redis://172.19.237.13:6379/1
+
+
+
+
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT_GMAIL = os.getenv("EMAIL_PORT_GMAI")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 # EMAIL_HOST_PASSWORD = 'zcyczyqehopfpzja'
-EMAIL_HOST_PASSWORD ='rheessrdhmnkahpv'  # substitua pela sua senha
-DEFAULT_FROM_EMAIL = 'barbeiroshop2024@gmail.com'
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")  # substitua pela sua senha
+DEFAULT_FROM_EMAIL =  os.getenv("DEFAULT_FROM_EMAIL")
 
 SITE_URL = 'http://localhost:8000'
 
