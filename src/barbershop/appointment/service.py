@@ -35,7 +35,7 @@ class ServiceAppointment:
     
     def get_appointment_date(self, date):
         selected_date = datetime.strptime(date, '%Y-%m-%d').date()
-        return  Appointment.objects.filter(date_time__date=selected_date)
+        return  Appointment.objects.filter(date_time__date=selected_date).order_by('-id')
     
     def get_appointment_user(self, user):
 
