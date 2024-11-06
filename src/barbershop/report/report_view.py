@@ -8,6 +8,7 @@ from barbershop.utils import  retrieve_month_names
 from barbershop.report.utils_report import extract_month_count_data, extract_week_count_data, extract_month_amount_data
 from django.http import JsonResponse
 from django.utils import timezone
+import traceback
 
 @admin_required
 def report(request):
@@ -90,6 +91,7 @@ def recover_data(request):
         return JsonResponse(data)
     
     except Exception as erro:
+
         return JsonResponse(erro)
 
 
@@ -117,44 +119,45 @@ def recover_data_week(request):
         return JsonResponse(erro)
 
 def recover_data_amount(request):
+    try:
+        mes = request.GET.get("mes")
+        tipo_corte = request.GET.get("tipo_corte")
+        print(tipo_corte)
+        service_report = ServiceReport()
 
-    mes = request.GET.get("mes")
-    tipo_corte = request.GET.get("tipo_corte")
-    print(tipo_corte)
-    service_report = ServiceReport()
-
-    if mes == "Todos" and tipo_corte == "Todos":
+        if mes == "Todos" and tipo_corte == "Todos":
+                
+            monthly_service_price_sum = service_report.get_all_amount()
+            data = extract_month_amount_data(monthly_service_price_sum)
+            return JsonResponse(data)
             
-        monthly_service_price_sum = service_report.get_all_amount()
-        data = extract_month_amount_data(monthly_service_price_sum)
-        return JsonResponse(data)
+        elif mes == "Todos" and tipo_corte != "Todos": 
+            tipo_corte_id = ast.literal_eval(tipo_corte).get("ID")
+            data_by_month_and_type = service_report.get_data_by_type_id_amount(tipo_corte_id)
+            data = extract_month_count_data(data_by_month_and_type
+                                            )
+            return JsonResponse(data)
         
-    elif mes == "Todos" and tipo_corte != "Todos": 
-        tipo_corte_id = ast.literal_eval(tipo_corte).get("ID")
-        data_by_month_and_type = service_report.get_data_by_type_id_amount(tipo_corte_id)
-        data = extract_month_count_data(data_by_month_and_type
-                                        )
-        return JsonResponse(data)
-    
-    elif mes != "Todos" and tipo_corte == "Todos":
-    
+        elif mes != "Todos" and tipo_corte == "Todos":
+        
+            mes_dict = ast.literal_eval(mes)
+            month_number = mes_dict.get('MONTH_NUMBER')
+
+            data_by_type_all_month = service_report.get_data_by_month_number_amount(month_number)
+            data = extract_month_count_data(data_by_type_all_month)
+
+            return JsonResponse(data)
+        
         mes_dict = ast.literal_eval(mes)
         month_number = mes_dict.get('MONTH_NUMBER')
 
-        data_by_type_all_month = service_report.get_data_by_month_number_amount(month_number)
-        data = extract_month_count_data(data_by_type_all_month)
+        tipo_corte_dict = ast.literal_eval(tipo_corte)
+        type_id = tipo_corte_dict.get('ID')
+
+        data_by_month_and_type = service_report.get_data_by_month_number_and_type_id_amount(month_number, type_id)
+        data = extract_month_count_data(data_by_month_and_type)
 
         return JsonResponse(data)
-    
-    mes_dict = ast.literal_eval(mes)
-    month_number = mes_dict.get('MONTH_NUMBER')
-
-    tipo_corte_dict = ast.literal_eval(tipo_corte)
-    type_id = tipo_corte_dict.get('ID')
-
-    data_by_month_and_type = service_report.get_data_by_month_number_and_type_id_amount(month_number, type_id)
-    data = extract_month_count_data(data_by_month_and_type)
-
-    return JsonResponse(data)
-   
+    except Exception as erro:
+        return JsonResponse(erro)
 

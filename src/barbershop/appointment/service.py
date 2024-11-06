@@ -21,8 +21,6 @@ class ServiceAppointment:
     
     def get_saved_month_appointment(request):
 
-        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-
         return Appointment.objects.annotate(
             month=F('date_time__month')
         ).values('month').distinct().order_by('month')
