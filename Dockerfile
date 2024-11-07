@@ -1,6 +1,12 @@
 # Usa uma imagem base Python
 FROM python:3.10
 
+RUN apt-get update && apt-get install -y locales
+RUN locale-gen pt_BR.UTF-8
+ENV LANG pt_BR.UTF-8
+ENV LANGUAGE pt_BR:pt
+ENV LC_ALL pt_BR.UTF-8
+
 WORKDIR /app
 
 COPY ./src /app
