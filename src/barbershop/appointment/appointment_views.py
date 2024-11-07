@@ -13,7 +13,8 @@ from accounts import exception
 import traceback
 from datetime import datetime
 from django.utils.timezone import now
-
+import pytz
+from datetime import datetime
 
 @login_required
 def register_appointment(request):
@@ -52,8 +53,8 @@ def list_appointment(request):
 
         service_appointment = ServiceAppointment()
         appointment_today = service_appointment.get_appointment_today()
-        
-        current_date = now().strftime("%Y-%m-%d")
+        timezone_sp = pytz.timezone("America/Sao_Paulo")
+        current_date = datetime.now(timezone_sp).strftime("%Y-%m-%d")
 
         if appointment_today is None:
             return redirect('register_appointment')
