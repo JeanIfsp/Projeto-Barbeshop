@@ -109,6 +109,9 @@ def password_reset_confirm(request, tokenstr, tokendate):
                 user_service.update_user(email, password)
     
                 return render(request, 'password_reset_done.html')
+
+            messages.error(request, 'Senhas incorretas')
+            return render(request, 'password_reset_confirm.html', {'tokenstr': tokenstr, 'tokendate': tokendate})
             
         if request.method == 'GET':    
         
@@ -121,8 +124,11 @@ def password_reset_confirm(request, tokenstr, tokendate):
     except Exception as error:
         messages.error(request, str(error))
     except ValueError as error:
+        print(str(error))
         messages.error(request, str(error))
     except exception.ValidationException as error:
         messages.error(request, str(error))
     except exception.ServiceUserException as error:
         messages.error(request, str(error))
+    
+    return render(request, 'password_reset_confirm.html', {'tokenstr': tokenstr, 'tokendate': tokendate})
