@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from barbershop.schedule.service import ShedulesService
 from barbershop.permissions import admin_required
 from django.urls import reverse
-
+from django.contrib import messages
 
 @admin_required
 def list_schedule(request):
@@ -11,7 +11,7 @@ def list_schedule(request):
     try:
         
         services = ShedulesService()
-        schedule =  services.get_list_shedules()
+        schedule =  services.get_list_shedules(request.user)
 
         if len(schedule) == 0:
 
@@ -20,7 +20,7 @@ def list_schedule(request):
         return render(request, 'scheduleTemplates/list_scheduler.html', {'schedules': schedule})
     
     except Exception as error:
-        print(str(error))
+        messages.error(request, f"{str(error)}")
 
 @admin_required
 def register_schedule(request):
@@ -35,11 +35,11 @@ def register_schedule(request):
             services.create_new_scheduler(request)
             return redirect(reverse('list_schedule'))
         
-        days = services.get_days_not_registers()
+        days = services.get_days_not_registers(request.user)
         return render(request, 'scheduleTemplates/register_schedule.html', {'days': days})
     
     except Exception as error:
-        print(error)
+        messages.error(request, f"{str(error)}")
 
 
 @admin_required
@@ -58,7 +58,7 @@ def update_schedule(request, id):
             return redirect(reverse('list_schedule'))
         return render(request,'scheduleTemplates/update_schedule.html', {"schedule":schedule})
     except Exception as error:
-        print(error)
+        messages.error(request, f"{str(error)}")
 
 
 @admin_required
@@ -72,4 +72,4 @@ def delete_schedule(request, id):
             return redirect(reverse('list_schedule'))
         return redirect(reverse('list_schedule'))
     except Exception as error:
-        print(str(error))
+        messages.error(request, f"{str(error)}")
