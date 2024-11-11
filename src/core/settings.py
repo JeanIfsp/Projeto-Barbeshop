@@ -178,7 +178,7 @@ SITE_URL = 'http://localhost:8000'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://172.19.237.13:6379/1",  # Porta padrão do Redis e database 1
+        "LOCATION": os.getenv("REDIS_URL"),  # Porta padrão do Redis e database 1
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
