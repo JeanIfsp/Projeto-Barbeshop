@@ -3,7 +3,7 @@ from datetime import datetime
 from chatbot.cache import RedisManager
 from chatbot.controller import recover_hours, exists_day_and_hour_available
 from accounts.services import UserService
-from accounts.validator import validator_first_name
+from accounts.validator import validator_barbeshop_name
 from barbershop.service.service import ServicePrice
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
 from barbershop.appointment.service import ServiceAppointment 
@@ -288,6 +288,7 @@ class Orquestrador:
                                     OptionsClient.INITIALIZE_QUESTION,
                                     self.profile_name)
                     return message_success + "\n" + message
+                
                 elif recive_message == AnswerDefault.NO:
                     self.redis.delete_key(self.cell_phone_number_client)
                     return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
