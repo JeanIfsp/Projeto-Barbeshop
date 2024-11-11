@@ -11,19 +11,19 @@ def list_service(request):
 
     try:
         
-        service_price = ServicePrice()
-        service =  service_price.get_list_service()
 
-        if len(service) == 0:
+        service_type = ServicePrice.get_list_service(request.user)
+
+        if len(service_type) == 0:
 
             return redirect(reverse('register_service'))
         
-        return render(request, 'servicesTemplates/list_service.html', {'services': service})
+        return render(request, 'servicesTemplates/list_service.html', {'services': service_type})
     
     except Exception as error:
-        messages.ERROR(request, "Ocorreu para listar os serviços")
+        messages.error(request, "Ocorreu para listar os serviços")
     finally:
-        return render(request, 'servicesTemplates/list_service.html', {'services': service})
+        return render(request, 'servicesTemplates/list_service.html', {'services': service_type})
 
 
 def register_service(request):
@@ -52,7 +52,6 @@ def register_service(request):
     except Exception as error:
         messages.error(request, "Ocorreu algum erro ao registrar novo serviço")
     except ValueError as error:
-        print(str(error))
         messages.error(request, str(error))
    
     return render(request, 'servicesTemplates/register_service.html')
@@ -65,7 +64,7 @@ def update_service(request, id):
     try:
         
         instance_service = service.get_hairname_price_day(id)
-        print("instance_service: ", instance_service)
+
         if request.method == "POST":
 
             haircut_price = request.POST.get('haircut_price')
@@ -79,11 +78,9 @@ def update_service(request, id):
         
         return render(request,'servicesTemplates/update_service.html', {'services': instance_service})
     except Exception as error:
-        print(str(error))
-        print(traceback.format_exc())
+        messages.error(request, str(error))
         messages.error(request, "Ocorreu um erro ao precessar a atualização do do serviço")
     except ValueError as error:
-        print(str(error))
         messages.error(request, str(error))
    
     return render(request,'servicesTemplates/update_service.html', {'services': instance_service})
