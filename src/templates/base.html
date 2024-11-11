@@ -140,8 +140,16 @@
                         </ul>
                     </section>
                 </li>
-
-
+            
+            <li class="style-type">
+                <a class="style-link" href="{% url 'register_client'%}">
+                    <button class="style-action">
+                        <span class="material-symbols-outlined">person_add</span>
+                    </button>
+                    <span class="style-name">Cadastrar Cliente</span>
+                </a>
+            </li>
+    
             {% endif %}
             {%if user.is_authenticated%}
                 <li class="style-type">
