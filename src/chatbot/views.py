@@ -10,7 +10,7 @@ from .dispatch import Orquestrador
 
 @api_view(['POST'])
 def bot_message(request):
-   
+    print(request.data)
     orquestrador = Orquestrador(request)
     message_receive = request.POST.get("Body")
     send_message = orquestrador.reply(message_receive)
