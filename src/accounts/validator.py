@@ -3,11 +3,11 @@ from accounts.exception import ValidationException
 from accounts.services import UserService
 
 
-def validator_first_name(first_name: str):
+def validator_barbeshop_name(barbershop_name: str):
 
-    if len(first_name) < 3:
-        raise ValidationException("O primeiro nome, necessita ter pelo menos 4 caracteres")
-    return first_name
+    if len(barbershop_name) < 3:
+        raise ValidationException("Para o nome do estabelecimento, necessita ter pelo menos 4 caracteres")
+    return barbershop_name
 
 
 def validator_email(email: str):

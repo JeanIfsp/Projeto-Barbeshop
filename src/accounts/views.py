@@ -4,12 +4,14 @@ from django.contrib import auth
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib import messages
+from django.db import transaction
 from accounts import exception
 from accounts import validator
 from accounts.services import UserService
 from core import token
 from core.email import Email
 from accounts.choices import UserType
+from barbershop.query import BarbershopService
 
 
 def register(request):
@@ -21,16 +23,24 @@ def register(request):
             cell_phone = validator.validator_cell_phone_number(request.POST.get('cell_phone'))
             email = validator.validator_email(request.POST.get('email'))
             password = validator.validator_password(request.POST.get('password'))
-            first_name = validator.validator_first_name(request.POST.get('first_name'))
+            name_barbeshop = validator.validator_barbeshop_name(request.POST.get('name_barbeshop'))
+            address = validator.validator_barbeshop_name(request.POST.get('address'))
+            
+            with transaction.atomic():  
 
-            user = UserService.create_user({"cell_phone":cell_phone,
-                                            "email":email,
-                                            "password": password,
-                                            "first_name":first_name,
-                                            "user_type":UserType.ADMIN})
+                user = UserService.create_user({"cell_phone":cell_phone,
+                                                "email":email,
+                                                "password": password,
+                                                "user_type":UserType.ADMIN})
 
-            if not user:
-                messages.error("Não foi possível criar o seu cadastro")
+                if not user:
+                    messages.error("Não foi possível criar o seu cadastro")
+            
+                barbsershop = BarbershopService.create_new_barbershop(user=user, address=address, name_barbershop=name_barbeshop)
+                print("barbsershop: ", barbsershop)
+                if not barbsershop:
+                    messages.error(request,"Não foi possível criar o estabelecimento")
+
             messages.success(request, 'Cadastro Realizado com Sucesso!')
             return redirect('login')
 
@@ -73,7 +83,7 @@ def logout(request):
 def password_reset(request):
     
     if request.method == "POST":
-        print(request.POST)
+
         user_service = UserService()
         user_instance = user_service.get_user(request.POST.get("recover_password_for_email"))
 
@@ -85,7 +95,7 @@ def password_reset(request):
             
             email_recover_password = Email()
             is_success_email = email_recover_password.recover_password(request.POST.get("recover_password_for_email"), token_email, token_date)
-            print("is_success_email: ", is_success_email)
+
             if is_success_email:
 
                 return render(request, 'request_reset_password_success.html')
@@ -124,7 +134,6 @@ def password_reset_confirm(request, tokenstr, tokendate):
     except Exception as error:
         messages.error(request, str(error))
     except ValueError as error:
-        print(str(error))
         messages.error(request, str(error))
     except exception.ValidationException as error:
         messages.error(request, str(error))
