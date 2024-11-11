@@ -1,47 +1,59 @@
+import traceback
+import pytz
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-# from barbershop.services import ServiceAppointment, ShedulesService
+from django.utils.timezone import now
+from django.contrib import messages
+from django.urls import reverse
+
 from barbershop.appointment.service import ServiceAppointment
 from barbershop.schedule.service import ShedulesService
 from barbershop.service.service import ServicePrice
 from barbershop.validator import available_day
+from barbershop.query import BarbershopService
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
+
 from accounts.services import UserService
-from django.contrib import messages
-from django.urls import reverse
 from accounts import exception
-import traceback
-from datetime import datetime
-from django.utils.timezone import now
-import pytz
-from datetime import datetime
+
 
 @login_required
 def register_appointment(request):
     
     try:
         
-        service = ServicePrice.get_list_service_name()
+        service = ServicePrice.get_list_service_name(request.user)
+        clients = BarbershopService.get_client_by_email_barbeshop(request.user.id)
 
         if request.method == "POST":
 
-            day = available_day(request)
-            
-            user = UserService.get_user(request.user.email)
-            instance_service = ServicePrice.get_instace_service_name(request.POST.get('type'))
-           
-            ServiceAppointment.create_new_appointment(user, instance_service, day)
+            client_id = request.POST.get('client')
+            day = available_day(request, client_id)
+
+            instance_service = ServicePrice.get_instace_service_name(request.POST.get('type'), request.user)
+            ServiceAppointment.create_new_appointment(client_id, instance_service, day)
             messages.success(request, "Agendamento criado com sucesso")
             return redirect('list_appointment')
         
-        return render(request,'AppointmentTemplates/register_appointment.html', {'service_type': service})
+        if request.method == "GET":
+
+            if not service:
+                return redirect('register_service')
+            
+            if not clients:
+                return redirect('register_client')
+
+
+            return render(request,'AppointmentTemplates/register_appointment.html', {'clients':clients, 'service_type': service})
+    
     except exception.ValidationException as error:
         messages.error(request, f"{str(error)}")
     except Exception as error:
-        messages.error(request, f"{str(error)}")
-        traceback.print_exc()
+        messages.error(request, f"{str(error)}\ {traceback.print_exc()}")
+        
 
-    return render(request,'AppointmentTemplates/register_appointment.html', {'service_type': service})
+    return render(request,'AppointmentTemplates/register_appointment.html', {'clients':clients, 'service_type': service})
 
 @login_required
 def list_appointment(request):
@@ -52,7 +64,7 @@ def list_appointment(request):
         current_date = now().date()
 
         service_appointment = ServiceAppointment()
-        appointment_today = service_appointment.get_appointment_today()
+        appointment_today = service_appointment.get_appointment_today(request.user.id)
         timezone_sp = pytz.timezone("America/Sao_Paulo")
         current_date = datetime.now(timezone_sp).strftime("%Y-%m-%d")
 
@@ -61,14 +73,16 @@ def list_appointment(request):
 
         if date:
             
-            appointment_date = service_appointment.get_appointment_date(date)
+            appointment_date = service_appointment.get_appointment_date(date, request.user.id)
             return render(request, 'AppointmentTemplates/list_appointment.html', {'appointments': appointment_date, 'current_date':current_date})
         
         return render(request, 'AppointmentTemplates/list_appointment.html', {'appointments': appointment_today, 'current_date':current_date})
         
     except Exception as error:
-        print(str(error))
-        
+        messages.error(request, f"{str(error)}\ {traceback.print_exc()}")
+    
+    return render(request, 'AppointmentTemplates/list_appointment.html', {'appointments': appointment_today, 'current_date':current_date})
+
 @login_required
 def search_list_appointment(request):
 
@@ -111,7 +125,7 @@ def reschedule_appointment(request, id):
     
     try:
         service_price = ServicePrice()
-        service = service_price.get_list_service_name()
+        service = service_price.get_list_service_name(request.user)
 
         if request.method == "POST":
 
@@ -139,16 +153,16 @@ def hours_list(request):
     
         today = recover_name_week_day(date)
 
-        work_hours = ShedulesService.get_hours_by_day_name_week(today)
+        work_hours = ShedulesService.get_hours_by_day_name_week(today, request.user)
         period_hours = generate_hours(work_hours.start_time, work_hours.end_time, work_hours.launch_time)
 
-        day_hours = ServiceAppointment.get_appointment_any_day(datetime.strptime(date, '%Y-%m-%d'))
+        day_hours = ServiceAppointment.get_appointment_any_day(request.user, datetime.strptime(date, '%Y-%m-%d'))
 
         available_hours = free_hours(day_hours , period_hours)
 
         return render(request, 'AppointmentTemplates/hours_dropdown.html', {'available_hours': available_hours})
     
     except Exception as error:
-        print(error)
+        messages.error(request, str(error))
     return redirect(reverse('register_appointment'))
     
