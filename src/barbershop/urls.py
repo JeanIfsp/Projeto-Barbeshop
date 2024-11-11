@@ -6,4 +6,5 @@ urlpatterns = [
     path('service/', include('barbershop.service.urls_service')),
     path('appointment/', include('barbershop.appointment.urls_appointment')),
     path('report/', include('barbershop.report.url_report')),
+    path('client/', include('barbershop.client.url_client')),
 ]
