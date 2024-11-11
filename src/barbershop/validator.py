@@ -3,7 +3,7 @@ from accounts.exception import ValidationException
 from datetime import datetime, timedelta
 
 
-def available_day(request):
+def available_day(request, client_id):
 
 
     if request.POST.get('hours') == None:
@@ -16,7 +16,7 @@ def available_day(request):
     new_appointment_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M')
    
     service_appointment = ServiceAppointment()
-    exits_datetime = service_appointment.get_hours_has_status_canceled(new_appointment_time)
+    exits_datetime = service_appointment.get_hours_has_status_canceled(new_appointment_time, client_id)
 
     if exits_datetime:
         raise ValidationException(f"Horários indisponível {new_appointment_time}, agende outro horário")
