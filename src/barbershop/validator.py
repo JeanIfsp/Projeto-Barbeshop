@@ -8,11 +8,9 @@ def available_day(request, client_id):
 
     if request.POST.get('hours') == None:
         raise ValidationException(f"Não temos horários disponivel para este dia")
-    print(request.POST.get('date_time'))
-    print(request.POST.get('hours'))
 
     date_time_str = request.POST.get('date_time') + "T" + request.POST.get('hours')
-    print(date_time_str)
+
     new_appointment_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M')
    
     service_appointment = ServiceAppointment()
