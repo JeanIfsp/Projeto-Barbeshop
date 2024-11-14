@@ -23,7 +23,7 @@ def register_appointment(request):
     
     try:
         
-        service = ServicePrice.get_list_service_name(request.user)
+        service = ServicePrice.get_list_service_name(request.user.id)
         clients = BarbershopService.get_client_by_email_barbeshop(request.user.id)
 
         if request.method == "POST":
@@ -31,7 +31,7 @@ def register_appointment(request):
             client_id = request.POST.get('client')
             day = available_day(request, client_id)
 
-            instance_service = ServicePrice.get_instace_service_name(request.POST.get('type'), request.user)
+            instance_service = ServicePrice.get_instace_service_name(request.POST.get('type'), request.user.id)
             ServiceAppointment.create_new_appointment(client_id, instance_service, day)
             messages.success(request, "Agendamento criado com sucesso")
             return redirect('list_appointment')
@@ -39,9 +39,11 @@ def register_appointment(request):
         if request.method == "GET":
 
             if not service:
+                messages.warning(request, "Você deve cadastrar um serviço para abrir a página de agendamento")
                 return redirect('register_service')
             
             if not clients:
+                messages.warning(request, "Você deve cadastrar um cliente para abrir a página de agendamento")
                 return redirect('register_client')
 
 
@@ -153,10 +155,10 @@ def hours_list(request):
     
         today = recover_name_week_day(date)
 
-        work_hours = ShedulesService.get_hours_by_day_name_week(today, request.user)
+        work_hours = ShedulesService.get_hours_by_day_name_week(today, request.user.id)
         period_hours = generate_hours(work_hours.start_time, work_hours.end_time, work_hours.launch_time)
 
-        day_hours = ServiceAppointment.get_appointment_any_day(request.user, datetime.strptime(date, '%Y-%m-%d'))
+        day_hours = ServiceAppointment.get_appointment_any_day(request.user.id, datetime.strptime(date, '%Y-%m-%d'))
 
         available_hours = free_hours(day_hours , period_hours)
 
