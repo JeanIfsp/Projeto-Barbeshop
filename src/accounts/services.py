@@ -65,7 +65,6 @@ class UserService:
         try:
 
             user = CustomUser.objects.get(cell_phone_number=cell_phone_number)
-            print("user: ", user)
             return True if user else False
         
         except CustomUser.DoesNotExist:

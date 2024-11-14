@@ -37,7 +37,7 @@ def register(request):
                     messages.error("Não foi possível criar o seu cadastro")
             
                 barbsershop = BarbershopService.create_new_barbershop(user=user, address=address, name_barbershop=name_barbeshop)
-                print("barbsershop: ", barbsershop)
+             
                 if not barbsershop:
                     messages.error(request,"Não foi possível criar o estabelecimento")
 

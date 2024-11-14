@@ -8,5 +8,4 @@ urlpatterns = [
     path('logout', views.logout, name="logout"),
     path('password_reset/', views.password_reset, name='password_reset'),
     path('password_reset_confirm/<str:tokenstr>/<str:tokendate>/', views.password_reset_confirm, name='password_reset_confirm'),
-   
 ]
