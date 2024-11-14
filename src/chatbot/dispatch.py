@@ -1,5 +1,7 @@
 import re
+import json
 from datetime import datetime
+from django.core.serializers import serialize, deserialize
 from chatbot.cache import RedisManager
 from chatbot.controller import recover_hours, exists_day_and_hour_available
 from accounts.services import UserService
@@ -8,12 +10,15 @@ from barbershop.service.service import ServicePrice
 from barbershop.utils import day_week, generate_hours, free_hours, recover_name_week_day
 from barbershop.appointment.service import ServiceAppointment 
 from barbershop.schedule.service import  ShedulesService
+from barbershop.query import BarbershopService
+from barbershop.client.service import ClientService
 from chatbot.utils import value_is_number, conveter_data
-from .message import (
+from chatbot.message import (
     recover_message,
     recover_messar_with_action,
     create_message_to_show_service,
-    create_message_to_show_hours
+    create_message_to_show_hours,
+    create_message_to_show_name_and_place_barbeshop
     )
 
 
@@ -26,6 +31,7 @@ class InitializeBotOptions:
 class OptionsClient:
 
     INITIALIZE_QUESTION = 0
+    INFORMATION_BARBERSHOP_ADDRES = 6
     INFORMATION_FORMAT_DATA = 1
     CHOOSE_YOUR_APPOINTMENT_TIME = 2
     CHOOSE_YOUR_SERVICE_TYPE = 3
@@ -53,8 +59,18 @@ class Orquestrador:
         self.cell_phone_number_client = request.POST.get("From").replace("whatsapp:+55", "")
         self.redis = RedisManager()
 
-    def crate_context(self, intent, action, data):
-        self.redis.set_key(self.cell_phone_number_client, {"intent":intent, "action":action, "data":data})
+    @property
+    def profile_name(self):
+        return self._profile_name
+
+    #
+    @profile_name.setter
+    def profile_name(self, profile_name):
+        self._profile_name = profile_name
+       
+
+    def crate_context(self, intent, action, data, data_json):
+        self.redis.set_key(self.cell_phone_number_client, {"intent":intent, "action":action, "data":data, "data_json":data_json})
 
     def reply(self, recive_message):
 
@@ -63,11 +79,13 @@ class Orquestrador:
         
         if not session_exists:
             
-            user_exists = UserService.get_user_cell_phone_number(self.cell_phone_number_client)
+            client_exists = ClientService.get_client_cell_phone_number(self.cell_phone_number_client)
             
-            if user_exists:
+            if client_exists:
 
-                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, None)
+                self.profile_name = client_exists.client_name 
+                data = {"client_name": client_exists.client_name, "cliente_id": client_exists.id}
+                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, data, None)
                 return recover_messar_with_action("OptionsClient",
                                     OptionsClient.INITIALIZE_QUESTION,
                                     self.profile_name)
@@ -93,18 +111,54 @@ class Orquestrador:
         
             if recive_message == AnswerDefault.YES:
 
+                data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+
+                queryset_barbershops = BarbershopService.get_data_barbershop()
+                data_json = serialize('json', queryset_barbershops)
+                
+                if queryset_barbershops:
+                    self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.INFORMATION_BARBERSHOP_ADDRES, data_save_redis, data_json)
+                    return create_message_to_show_name_and_place_barbeshop(queryset_barbershops)
+                
+                return "Não temos nenhuma barbearia cadastrada, entra em contato mais tarde conosco"
+            
+            elif recive_message == AnswerDefault.NO:
+
+                self.redis.delete_key(self.cell_phone_number_client)
+                return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
+
+            return "Informe por gentileza uas da opções\n*1* - *SIM*\n*2* - *NÃO*"
+
+        elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.INFORMATION_BARBERSHOP_ADDRES:
+            
+            data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+            data_json = self.redis.get_key(self.cell_phone_number_client).get("data_json")
+
+            data_deserialize = deserialize('json', data_json)
+            chosen_establishment = [obj.object for obj in data_deserialize]
+
+            if value_is_number(recive_message):
+
                 current_date = datetime.now().strftime("%d/%m/%Y")
-                self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.INFORMATION_FORMAT_DATA, None)
+                admin_id = chosen_establishment[int(recive_message)].admin.id
+                barbershop_info = chosen_establishment[int(recive_message)]
+
+                data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+
+                data_save_redis["admin_id"] = admin_id
+                data_save_redis["barbershop_name"] = barbershop_info.name_barbershop
+                data_save_redis["barbershop_address"] = barbershop_info.address
+
+                self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.INFORMATION_FORMAT_DATA, data_save_redis, None)
+                
                 return recover_messar_with_action("OptionsClient",
                                         OptionsClient.INFORMATION_FORMAT_DATA,
                                         self.profile_name,
                                         current_date
                                         )
-            
-            elif recive_message == AnswerDefault.NO:
-                self.redis.delete_key(self.cell_phone_number_client)
-                return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
-        
+
+            return create_message_to_show_name_and_place_barbeshop(chosen_establishment)
+
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.INFORMATION_FORMAT_DATA:
 
             pattern = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$'
@@ -112,14 +166,19 @@ class Orquestrador:
             if re.match(pattern, recive_message):
 
                 if datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date():
-            
-                    work_hours_exists, available_hours = recover_hours(recive_message)
+
+                    data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+                    admin_id = data_save_redis.get("admin_id")
+                    work_hours_exists, available_hours = recover_hours(recive_message, admin_id)
+                    
                     if work_hours_exists:
+
                         available_hours_format = create_message_to_show_hours(available_hours)
                         
-                        data = {"day":recive_message, "available_hours": available_hours}
+                        data_save_redis["day"] = recive_message
+                        data_save_redis["available_hours"] = available_hours
                         
-                        self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, data)
+                        self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME, data_save_redis, None)
                         
                         return recover_messar_with_action("OptionsClient",
                                                     OptionsClient.INFORMATION_FORMAT_DATA,
@@ -139,19 +198,20 @@ class Orquestrador:
         
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.CHOOSE_YOUR_APPOINTMENT_TIME:
 
-           
+            data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+
+            self.profile_name = data_save_redis.get("client_name")
+
             if value_is_number(recive_message):
 
-                service_type = ServicePrice.get_list_service_name()
-                data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+                admin_id = data_save_redis.get("admin_id")
+                service_type = ServicePrice.get_list_service_name(admin_id)
                 hour = data_save_redis.get("available_hours")
 
-                data = {}
-                data["day"] = data_save_redis.get("day")
-                data["hours"] = hour[int(recive_message)]
-                data["sevice_type"] = list(service_type)
+                data_save_redis["hours"] = hour[int(recive_message)]
+                data_save_redis["sevice_type"] = list(service_type)
             
-                self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_SERVICE_TYPE, data)
+                self.crate_context(InitializeBotOptions.IS_CLIENT, OptionsClient.CHOOSE_YOUR_SERVICE_TYPE, data_save_redis, None)
                 
                 return recover_messar_with_action("OptionsClient",
                                                     OptionsClient.CHOOSE_YOUR_SERVICE_TYPE,
@@ -172,6 +232,7 @@ class Orquestrador:
 
             data = self.redis.get_key(self.cell_phone_number_client).get('data')
             service_type = data.get("sevice_type")
+            self.profile_name = data.get("client_name")
 
             pattern = "^(1?[0-9]|20)$" 
 
@@ -179,15 +240,17 @@ class Orquestrador:
 
                 type_service = service_type[int(recive_message)]
 
-                data_appointment = {"day": data.get("day"), "hours": data.get("hours"), "service_type": type_service}
-                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_appointment)
+                data_appointment = {"client_name":data.get("client_name"), "client_id": data.get("cliente_id"), "admin_id":data.get("admin_id"), "day": data.get("day"), "hours": data.get("hours"), "service_type": type_service}
+                self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.REGISTER_APPOINTMENT, data_appointment, None)
                 
                 return recover_messar_with_action("OptionsClient",
                                                     OptionsClient.REGISTER_APPOINTMENT,
                                                     self.profile_name,
                                                     data.get("hours"),
                                                     data.get("day"),
-                                                    type_service
+                                                    type_service,
+                                                    data.get("barbershop_name"),
+                                                    data.get("barbershop_address")
                                                     )
             
             return recover_messar_with_action("OptionsClient",
@@ -195,22 +258,25 @@ class Orquestrador:
                                                     self.profile_name,
                                                     create_message_to_show_service(list(service_type))
                                                     )
+        
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.REGISTER_APPOINTMENT:
+
+            data_appointment = self.redis.get_key(self.cell_phone_number_client).get("data")
+            self.profile_name = data_appointment.get("client_name") 
 
             if recive_message == AnswerDefault.YES:
     
-                data_appointment = self.redis.get_key(self.cell_phone_number_client).get("data")
            
-                if exists_day_and_hour_available(data_appointment.get("day"), data_appointment.get("hours")):
+                if exists_day_and_hour_available(data_appointment.get("day"), data_appointment.get("hours"), data_appointment.get("client_id")):
 
-                    user = UserService.get_user_instance_cell_phone_number(self.cell_phone_number_client)
+                    client_exists = ClientService.get_client_cell_phone_number(self.cell_phone_number_client)
                
-                    instance_service = ServicePrice.get_instace_service_name(data_appointment.get("service_type"))
+                    instance_service = ServicePrice.get_instace_service_name(data_appointment.get("service_type"), data_appointment.get("admin_id"))
                     
                     day_time = conveter_data(data_appointment.get("day")) + 'T' + data_appointment.get("hours")
                     date_time = datetime.strptime(day_time, '%Y-%m-%dT%H:%M')
                     
-                    ServiceAppointment.create_new_appointment(user, instance_service, date_time)
+                    ServiceAppointment.create_new_appointment(client_exists.id, instance_service, date_time)
 
                     self.redis.delete_key(self.cell_phone_number_client)
                     return recover_messar_with_action("OptionsClient",
