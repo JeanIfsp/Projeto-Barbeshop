@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.db import transaction
-from accounts import validator
-from accounts import exception
+from barbershop.client import validator
+from barbershop.client import exception
 from barbershop.client.service import ClientService
+import traceback
 
 
 def register_client(request):
@@ -13,7 +14,7 @@ def register_client(request):
         try:
 
             cell_phone_number = validator.validator_cell_phone_number(request.POST.get('cell_phone'))
-            client_name = validator.validator_barbeshop_name(request.POST.get('client_name'))
+            client_name = validator.validator_client_name(request.POST.get('client_name'))
 
             with transaction.atomic(): 
                 
@@ -32,9 +33,8 @@ def register_client(request):
 
         except exception.ValidationException as error:
             messages.error(request, str(error))
-        except exception.ServiceUserException as error:
+        except exception.ServiceClientException as error:
             messages.error(request, str(error))
         except Exception as error:
-            messages.error(request, "Informe outro úmero por gentileza")
-    
+            messages.error(request, "Por algum motivo o número não pode ser cadastrado")
     return render(request, "clientTemplates/register_client.html")
