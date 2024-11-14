@@ -37,7 +37,8 @@ MESSAGE_CHOOSE_YOUR_SERVICE_TYPE = """
 
 
 MESSAGES_INFORMATION_REGISTER_APPOINTMENT = """
-    %s confirma o seu agendamento para ás: *%s hs* no dia *%s* serviço de *%s*\n
+    %s confirma o seu agendamento para ás: *%s hs* no dia *%s* serviço de *%s* *%s*\n
+    *%s*\n
 *1 - Sim* 
 *2 - Não*
 """
@@ -78,19 +79,15 @@ MESSAGES = {
 
 
 def recover_message(key, *args):
-    print('args: ', args)    
+  
     message = MESSAGES.get(key)
     message_add_values = message % args
-    print(message_add_values)
     return message_add_values
 
 def recover_messar_with_action(key, action, *args):
-    print("key: ", key)
-    print("action: ", action)
-    print("Args: ", args)
+
     message = MESSAGES[key][str(action)]
     message_add_values = message % args
-    print("message_add_values: ", message_add_values)
     return message_add_values
 
 
@@ -102,6 +99,13 @@ def create_message_to_show_hours(hours):
 def create_message_to_show_service(service_name):
 
     result =  "\n".join([f"{i} - {service}" for i, service in enumerate(service_name)])
-    print(result)
     return result
        
+
+def create_message_to_show_name_and_place_barbeshop(barbershops):
+
+    message = "📋 *Lista de Barbearias Disponíveis:*\n\n"
+    for i, barber in enumerate(barbershops):
+        message += f" *{i}* - ✂️ *{barber.name_barbershop}*\n   📍 Endereço: {barber.address}\n\n"
+    message += "*Informe por gentileza o número do estabelecimento que deseja agendar o serviço*"
+    return message
