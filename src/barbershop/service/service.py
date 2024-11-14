@@ -11,7 +11,7 @@ class ServicePrice:
     @staticmethod
     def get_list_service_name(user) -> Service:
 
-        return Service.objects.filter(user=user).values_list('service_type', flat=True)
+        return Service.objects.filter(user_id=user).values_list('service_type', flat=True)
     
     def get_list_service_register(self, admin) -> Service:
          
@@ -24,7 +24,7 @@ class ServicePrice:
     @staticmethod
     def get_instace_service_name(type_service, user):
      
-        return Service.objects.get(service_type=type_service, user_id=user.id)
+        return Service.objects.get(service_type=type_service, user_id=user)
     
     def create_new_scheduler(self, data):
 
@@ -40,7 +40,7 @@ class ServicePrice:
     def get_haircut_name_to_check(self, data):
 
         haircut_name = data.POST.get('haircut_name')
-        return Service.objects.filter(service_type__iexact=haircut_name.upper()).exists()
+        return Service.objects.filter(service_type__iexact=haircut_name.upper(), user_id=data.user.id).exists()
     
     def update_service(self, instance, data):
 

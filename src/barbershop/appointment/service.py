@@ -70,7 +70,7 @@ class ServiceAppointment:
     def get_appointment_any_day(user, day):
         
         return list(Appointment.objects.filter(date_time__date=day,
-                                               type_id__user_id=user.id, 
+                                               type_id__user_id=user, 
                                                status__in=(AppointmentType.SHEDULED, AppointmentType.COMPLETED)
                                                ).annotate(hora=Extract('date_time', 'hour')
                                                 ).values_list('hora', flat=True))
