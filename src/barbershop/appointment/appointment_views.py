@@ -25,6 +25,9 @@ def register_appointment(request):
         
         service = ServicePrice.get_list_service_name(request.user.id)
         clients = BarbershopService.get_client_by_email_barbeshop(request.user.id)
+        
+        schedule_service = ShedulesService()
+        schedule = schedule_service.get_list_shedules(request.user)
 
         if request.method == "POST":
 
@@ -34,6 +37,7 @@ def register_appointment(request):
             instance_service = ServicePrice.get_instace_service_name(request.POST.get('type'), request.user.id)
             ServiceAppointment.create_new_appointment(client_id, instance_service, day)
             messages.success(request, "Agendamento criado com sucesso")
+            
             return redirect('list_appointment')
         
         if request.method == "GET":
@@ -42,6 +46,10 @@ def register_appointment(request):
                 messages.warning(request, "Você deve cadastrar um serviço para abrir a página de agendamento")
                 return redirect('register_service')
             
+            if not schedule:
+                messages.warning(request, "Você deve cadastrar um horários de atendimento para abrir a página de agendamento")
+                return redirect('register_schedule')
+
             if not clients:
                 messages.warning(request, "Você deve cadastrar um cliente para abrir a página de agendamento")
                 return redirect('register_client')
