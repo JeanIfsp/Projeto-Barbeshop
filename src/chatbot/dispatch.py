@@ -91,7 +91,7 @@ class Orquestrador:
                                     self.profile_name)
             else:
 
-                self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.QUESTION_NAME, None)
+                self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.QUESTION_NAME, None, None)
                 return recover_message("InitializeBotOptions",
                                     self.profile_name,
                                     )
@@ -132,6 +132,7 @@ class Orquestrador:
         elif self.redis.get_key(self.cell_phone_number_client).get('action') == OptionsClient.INFORMATION_BARBERSHOP_ADDRES:
             
             data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+            self.profile_name = data_save_redis.get("client_name")
             data_json = self.redis.get_key(self.cell_phone_number_client).get("data_json")
 
             data_deserialize = deserialize('json', data_json)
@@ -144,7 +145,7 @@ class Orquestrador:
                 barbershop_info = chosen_establishment[int(recive_message)]
 
                 data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
-
+   
                 data_save_redis["admin_id"] = admin_id
                 data_save_redis["barbershop_name"] = barbershop_info.name_barbershop
                 data_save_redis["barbershop_address"] = barbershop_info.address
@@ -168,6 +169,7 @@ class Orquestrador:
                 if datetime.strptime(recive_message, "%d/%m/%Y").date() >= datetime.now().date():
 
                     data_save_redis = self.redis.get_key(self.cell_phone_number_client).get('data')
+                    self.profile_name = data_save_redis.get("client_name")
                     admin_id = data_save_redis.get("admin_id")
                     work_hours_exists, available_hours = recover_hours(recive_message, admin_id)
                     
@@ -276,6 +278,13 @@ class Orquestrador:
                     day_time = conveter_data(data_appointment.get("day")) + 'T' + data_appointment.get("hours")
                     date_time = datetime.strptime(day_time, '%Y-%m-%dT%H:%M')
                     
+                    admin_id = data_appointment.get("admin_id")
+                    client_id = data_appointment.get("client_id")
+                    
+                    if not ClientService.get_relationship_between_cliente_and_barbershop_pass_id(admin_id, client_id):
+
+                        ClientService.create_relationship_between_cliente_and_barbershop_pass_id(admin_id, client_id)
+
                     ServiceAppointment.create_new_appointment(client_exists.id, instance_service, date_time)
 
                     self.redis.delete_key(self.cell_phone_number_client)
@@ -289,12 +298,14 @@ class Orquestrador:
                                     self.profile_name)
             
             elif recive_message == AnswerDefault.NO:
+
                 self.delete_key(self.cell_phone_number_client)
                 return "🙏 Agradecemos pelo seu contato! Sempre que desejar agendar nossos serviços, estaremos à disposição para atendê-lo."
-            
-            
+             
             else:
+
                 data = self.redis.get_key(self.cell_phone_number_client).get('data')
+
                 return recover_messar_with_action("OptionsClient",
                                                     OptionsClient.REGISTER_APPOINTMENT,
                                                     self.profile_name,
@@ -313,7 +324,7 @@ class Orquestrador:
                 if value_is_number(recive_message):
                     
                     if recive_message == AnswerDefault.YES:
-                        self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.FINISH_REGISTER_USER, None)
+                        self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.FINISH_REGISTER_USER, None, None)
                         return "Por gentileza, informe como você gostaria de ser chamado ?"
                    
                     elif recive_message == AnswerDefault.NO:
@@ -330,7 +341,7 @@ class Orquestrador:
                 
                 if len(recive_message) > 3:
                     data = {"name": recive_message, "cell_phone_number": self.cell_phone_number_client}
-                    self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.COMPLETE, data)
+                    self.crate_context(InitializeBotOptions.REGISTER_USER, RegisterUser.COMPLETE, data, None)
 
 
                     return recover_messar_with_action("RegisterUser",
@@ -346,14 +357,19 @@ class Orquestrador:
             if value_is_number(recive_message):
                 
                 if recive_message == AnswerDefault.YES:
+
                     data = self.redis.get_key(self.cell_phone_number_client).get("data")
-                    UserService.create_client({"name":data.get("name"), "cell_phone_number": data.get("cell_phone_number")})
-                    self.crate_context(InitializeBotOptions.IS_CLIENT,  OptionsClient.INITIALIZE_QUESTION, None)
-                    message_success = "✅ Cadastro realizado com sucesso!"
-                    message = recover_messar_with_action("OptionsClient",
-                                    OptionsClient.INITIALIZE_QUESTION,
-                                    self.profile_name)
-                    return message_success + "\n" + message
+                    client = ClientService.create_new_client({"client_name":data.get("name"), "cell_phone_number": data.get("cell_phone_number")})
+                   
+                    if not client:    
+                        return "Número já cadastrado"
+
+                    self.redis.delete_key(self.cell_phone_number_client)
+                    
+                    message = f"*{client.client_name}*"
+                    message_success = "✅ *Cadastro realizado com sucesso!* \n qualque tecla para continuar"
+                   
+                    return message + "\n" + message_success 
                 
                 elif recive_message == AnswerDefault.NO:
                     self.redis.delete_key(self.cell_phone_number_client)
