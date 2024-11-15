@@ -20,7 +20,7 @@ class ServicePrice:
     def get_hairname_price_day(self, id):
 
         return Service.objects.get(id=id)
-    
+
     @staticmethod
     def get_instace_service_name(type_service, user):
      
