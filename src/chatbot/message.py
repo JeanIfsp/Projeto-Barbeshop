@@ -1,50 +1,64 @@
 
 MESSAGES_INITIALIZE = """
-    *Olá %s, Seja Bem-Vindo à Barbeshop!*
+*Olá %s, Seja Bem-Vindo à Barbeshop!*
 
-    _Lembramos que este contato é para solicitação_  
-    _de agendamento de nossos serviços._
+_Lembramos que este contato é para solicitação_  
+_de agendamento de nossos serviços._
 
-    *Como podemos ajudá-lo?* 😊
-    
-    *Deseja se cadastrar ?*
-    
-    Digite o número correspondente à sua escolha:
+*Como podemos ajudá-lo?* 😊
 
-    *1 - Sim* 
-    *2 - Não*
+*Deseja se cadastrar ?*
+
+Digite o número correspondente à sua escolha:
+
+1️⃣ *Sim – para confirmar*
+2️⃣ *Não – para cancelar*
+
 """
 
 MESSAGES_CLIENT_EXISTS = """
-    %s Deseja Agendar seu atendimento:
-*1 - Sim* 
-*2 - Não*
+*%s Deseja Agendar seu atendimento:*\n
+1️⃣ *Sim – para confirmar*
+2️⃣ *Não – para cancelar*
 """
 
 MESSAGE_INFORMATION_CLIENTE_FORMATE_DATA = """
-    %s por gentileza, informe o dia desejado para agendar seu atendimento no seguinte formato: \n %s
+👋 *%s, por gentileza, informe o dia desejado para agendar seu atendimento!*
+*Informe o dia no padrão: %s*\n
 """
 
 MESSAGE_CHOOSE_YOUR_APPOINTMENT_TIME = """
-    %s temos esses horários disponíveis para agendamento:
-    %s hs
+👋 *%s, temos esses serviços disponíveis para agendamento!*\n
+*Escolha uma opção:*
+*%s hs*
 """
 
 MESSAGE_CHOOSE_YOUR_SERVICE_TYPE = """
-    %s temos esses serviços disponíveis para agendamento:
-    %s
+👋*%s temos esses serviços disponíveis para agendamento:*\n
+*%s*
 """
 
 
 MESSAGES_INFORMATION_REGISTER_APPOINTMENT = """
-    %s confirma o seu agendamento para ás: *%s hs* no dia *%s* serviço de *%s* *%s*\n
-    *%s*\n
-*1 - Sim* 
-*2 - Não*
+
+👋 %s, confirme seu agendamento:
+
+📅 Data: %s
+🕕 Horário: %s
+💇 Serviço: %s
+🏠 Local: %s
+📍 Endereço: %s
+\n
+
+1️⃣ *Sim – para confirmar*
+2️⃣ *Não – para cancelar*
+
+😊 Estamos aguardando sua resposta!
 """
 
 MESSAGE_FINISH_REFISTER_APPOINTMENT = """
-*%s Muito obrigado por agendar seu horário conosco!*
+*%s* 
+*Muito obrigado por agendar seu horário conosco!*
 *Até breve ✂️😊*
 *Estamos até aguardando.*
 """
@@ -54,8 +68,8 @@ MESSAGE_QUESTION_REGISTER_USER = """
 *Nome:* %s
 *what's up:* %s\n
 
-*1 - Sim*
-*2 - Não*
+1️⃣ *Sim – para confirmar*
+2️⃣ *Não – para cancelar*
 """
 
 
