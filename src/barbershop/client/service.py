@@ -18,7 +18,7 @@ class ClientService:
             return client
         
         except Exception as error:
-            raise Exception(str(error))
+            raise False
         except Client.DoesNotExist as error:
             raise ServiceClientException(error)
 
@@ -31,7 +31,28 @@ class ClientService:
             
         except Exception as error:
             raise Exception(str(error))
+    
+    @staticmethod
+    def create_relationship_between_cliente_and_barbershop_pass_id(admin, client) -> ClientBarbershop:
 
+        try:
+            
+            client_babershop = ClientBarbershop.objects.create(admin_id=admin, client_id=client)
+            return client_babershop
+            
+        except Exception as error:
+            return False
+
+    @staticmethod
+    def get_relationship_between_cliente_and_barbershop_pass_id(admin, client) -> ClientBarbershop:
+
+        try:
+            
+            client_babershop = ClientBarbershop.objects.filter(admin_id=admin, client_id=client).exists()
+            return client_babershop
+            
+        except Exception as error:
+            return False
     
     def get_client_cell_phone_number_exists(cell_phone_number):
 
