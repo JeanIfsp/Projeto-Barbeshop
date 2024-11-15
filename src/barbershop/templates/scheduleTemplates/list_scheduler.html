@@ -38,4 +38,11 @@
             <a href="{% url 'register_schedule'%}" class="btn btn-primary">Criar Novo Horário</a>
         </div>
     </div>
+    {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                   {{message}}
+                </div>
+            {% endfor %}
+        {% endif %}
 {% endblock %}
