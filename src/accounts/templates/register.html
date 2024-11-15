@@ -13,7 +13,7 @@
         <div class="container mt-5">
             <div class="row">
                 <div class="col-md-6 offset-md-3">
-                    <h2 class="text-center">Cadastro</h2>
+                    <h2 class="text-center">Cadastre Sua Barbearia</h2>
                     <form action="{% url 'register' %}" method="POST">{% csrf_token %}
                         <div class="form-group">
                             <label for="email">Email</label>
@@ -24,7 +24,7 @@
                             <input type="text" class="form-control" id="cell_phone" name="cell_phone" placeholder="Exemplo 16112345657" required value="{{cell_phone}}">
                         </div>
                         <div class="form-group">
-                            <label for="first_name">Nome do salão</label>
+                            <label for="first_name">Nome do salão ou barbearia</label>
                             <input type="text" class="form-control" id="name_barbeshop" name="name_barbeshop" placeholder="Exemplo Salão odo José ou Barbearia Silva" required value="{{name_barbeshop}}">
                         </div>
                         <div class="form-group">
