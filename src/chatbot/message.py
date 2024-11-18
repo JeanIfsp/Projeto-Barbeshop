@@ -23,8 +23,9 @@ MESSAGES_CLIENT_EXISTS = """
 """
 
 MESSAGE_INFORMATION_CLIENTE_FORMATE_DATA = """
-👋 *%s, por gentileza, informe o dia desejado para agendar seu atendimento!*
-*Informe o dia no padrão: %s*\n
+👋 *%s, por gentileza, informe o horáriodesejado para agendar seu atendimento!*
+*Informe o número correspondente ao horário:*\n
+*%s*
 """
 
 MESSAGE_CHOOSE_YOUR_APPOINTMENT_TIME = """
