@@ -23,9 +23,9 @@ MESSAGES_CLIENT_EXISTS = """
 """
 
 MESSAGE_INFORMATION_CLIENTE_FORMATE_DATA = """
-👋 *%s, por gentileza, informe o horáriodesejado para agendar seu atendimento!*
+👋 *%s, por gentileza, informe a hora para agendar seu atendimento!*
 *Informe o número correspondente ao horário:*\n
-*%s*
+%s
 """
 
 MESSAGE_CHOOSE_YOUR_APPOINTMENT_TIME = """
@@ -35,8 +35,8 @@ MESSAGE_CHOOSE_YOUR_APPOINTMENT_TIME = """
 """
 
 MESSAGE_CHOOSE_YOUR_SERVICE_TYPE = """
-👋*%s temos esses serviços disponíveis para agendamento:*\n
-*%s*
+👋*%s* *temos esses serviços disponíveis para agendamento:*\n
+%s
 """
 
 
@@ -108,12 +108,12 @@ def recover_messar_with_action(key, action, *args):
 
 def create_message_to_show_hours(hours):
 
-    result = "\n".join([f"{i} - {hour}" for i, hour in enumerate(hours)])
+    result = "\n".join([f"*{i}* - *{hour}*" for i, hour in enumerate(hours)])
     return result
 
 def create_message_to_show_service(service_name):
 
-    result =  "\n".join([f"{i} - {service}" for i, service in enumerate(service_name)])
+    result =  "\n".join([f"*{i}* - *{service}*" for i, service in enumerate(service_name)])
     return result
        
 

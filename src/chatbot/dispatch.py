@@ -367,7 +367,7 @@ class Orquestrador:
                     self.redis.delete_key(self.cell_phone_number_client)
                     
                     message = f"*{client.client_name}*"
-                    message_success = "✅ *Cadastro realizado com sucesso!* \n qualque tecla para continuar"
+                    message_success = "✅ *Cadastro realizado com sucesso!* \n *Informe qualquer tecla para continuar*"
                    
                     return message + "\n" + message_success 
                 
